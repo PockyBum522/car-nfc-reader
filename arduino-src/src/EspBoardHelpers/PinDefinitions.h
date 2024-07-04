@@ -10,7 +10,7 @@ class PinDefinitions
 public:
     static const int PIN_UNLOCK = 42;
     static const int PIN_LOCK = 41;
-    static const int PIN_ALARM = 40;
+    static const int PIN_TRUNK = 40;
 
     static const int PIN_PN532_BOARD_POWER = 48;
 

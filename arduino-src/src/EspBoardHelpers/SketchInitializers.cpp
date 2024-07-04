@@ -19,11 +19,11 @@ void SketchInitializers::InitializeSpiPins()
 void SketchInitializers::InitializeRemotePins()
 {
     pinMode(PinDefinitions::PIN_UNLOCK, OUTPUT);
-    digitalWrite(PinDefinitions::PIN_UNLOCK, LOW);
+    digitalWrite(PinDefinitions::PIN_UNLOCK, HIGH);
 
     pinMode(PinDefinitions::PIN_LOCK, OUTPUT);
-    digitalWrite(PinDefinitions::PIN_LOCK, LOW);
+    digitalWrite(PinDefinitions::PIN_LOCK, HIGH);
 
-    pinMode(PinDefinitions::PIN_ALARM, OUTPUT);
-    digitalWrite(PinDefinitions::PIN_LOCK, LOW);
+    pinMode(PinDefinitions::PIN_TRUNK, OUTPUT);
+    digitalWrite(PinDefinitions::PIN_LOCK, HIGH);
 }

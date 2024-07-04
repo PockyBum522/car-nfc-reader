@@ -41,6 +41,8 @@ void setup()
     sketchInitializers.InitializeSpiPins();
 
     pn532ShieldHandler.InitializeNfcShield(true);
+
+    sketchInitializers.InitializeRemotePins();
 }
 
 void loop()
