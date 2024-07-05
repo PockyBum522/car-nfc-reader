@@ -16,3 +16,11 @@ Above working as of 2024-07-03
 For 2003 Corolla: Remote buttons are LOW when inactive and driving them HIGH will activate
 
 For 2008 honda: Remote buttons are HIGH when inactive and driving them LOW will activate
+
+2008 Honda Remote Pins:
+
+White/Orange - 3v3 in - ETH 1
+Brown        - GND    - ETH 8
+Green        - Unlock - ETH 6
+White/Green  - Lock   - ETH 3
+Blue         - Trunk  - ETH 4
