@@ -1,19 +1,21 @@
 #include <Arduino.h>
-#include <vector>
 #include <ESP32Time.h>
 #include <Secrets/Secrets.h>
-
 #include "EspBoardHelpers/EspNeopixel.h"
 #include "EspBoardHelpers/SketchInitializers.h"
 #include "Nfc/Pn532ShieldHandler.h"
 #include "CarHelper/CarHelper.h"
-#include "Models/NfcTag.h"
 #include "Logging/Logger.h"
 
 
 // Constants
 #define microsToMillis 10000                    /* Conversion factor for micro seconds to milliseconds */
 
+
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  3        /* Time ESP32 will go to sleep (in seconds) */
+
+RTC_DATA_ATTR int bootCount = 0;
 
 // RTC memory persistent variables
 RTC_DATA_ATTR unsigned long long epochAtLastRead = 0;
@@ -22,41 +24,78 @@ RTC_DATA_ATTR unsigned long long epochAtDomeLightLastOn = 0;
 RTC_DATA_ATTR bool carLockedOnceFlag = false;
 RTC_DATA_ATTR bool carLockedTwiceFlag = false;
 
+bool runOnce = false;
+
 // Dependency setup
-auto logger = *new Logger(LogLevel::Debug);
+auto logger = *new Logger(LogLevel::Information); // Change this to fatal for what probably amounts to an imperceptibly faster time
 
 ESP32Time espRtc(0);
 auto sketchInitializers = *new SketchInitializers();
 auto carHelper = *new CarHelper();
-auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead);
-
+auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc);
 
 void LockBasedOnDomeLightVoltageLoop();
 unsigned long long IncreasingDelayWithTimeMilliseconds();
 
 void setup()
 {
-    Serial.begin(115200);
+    pinMode(15, OUTPUT);
+    digitalWrite(15, HIGH);
+
+
+
+      // // For power savings, set all pins not being used as inputs to outputs. It works.
+      // for (int i = 0; i < 17; i++)
+      // {
+      //   if (i == 2){ i = 3; } // Skip ss pin
+      //   if (i == 10){ i = 12; } // Skip lock/unlock pins
+      //
+      //   pinMode(i, OUTPUT);
+      // }
+
+    //Serial.begin(115200);
 
     sketchInitializers.InitializeSpiPins();
 
-    pn532ShieldHandler.InitializeNfcShield(true);
+    sketchInitializers.Honda2008InitializeRemotePins();
 
-    sketchInitializers.InitializeRemotePins();
+    logger.Information("Checking for tag and sleeping");
+
+    pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
+
+    bootCount = bootCount + 1;
+
+    esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+
+    esp_deep_sleep_start();
 }
 
 void loop()
 {
-    delay(100); // Necessary to prevent hang
+    // // If it hasn't been 12 hours yet, just run a constant loop
+    // while (IncreasingDelayWithTimeMilliseconds() < 250)
 
-    pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
+    // Testing @ 30min
+    // while (IncreasingDelayWithTimeMilliseconds() < 10)
+    // {
+    //     if (!runOnce)
+    //     {
+    //         delay(100);
+    //
+    //         pn532ShieldHandler.InitializeNfcShield(true);
+    //
+    //         runOnce = true;
+    //     }
+    //
+    //     logger.Information("Checking in while loop");
+    //     pn532ShieldHandler.CheckForNfcTag(Secrets::authorizedNfcTags);
+    // }
+
 }
-
 
 unsigned long long IncreasingDelayWithTimeMilliseconds()
 {
-    static constexpr unsigned long HOURS = 60 * 60;
-    static constexpr unsigned long DAYS = 24 * HOURS;
+    return 4000;
 
     constexpr unsigned long long delayMillisConstant = 0.006;
 
@@ -69,9 +108,9 @@ unsigned long long IncreasingDelayWithTimeMilliseconds()
 
     //if (delayMillis < 100)  return 100;
 
-    if (delayMillis < 3000) return delayMillis;
+    //if (delayMillis < 3000) return delayMillis;
 
-    else                    return 4000;
+
 
     //    Hours	    Minutes	    Seconds     Delay millis with constant = 0.006
     //
@@ -92,7 +131,7 @@ void LockBasedOnDomeLightVoltageLoop()
     unsigned long long rtcLocalEpoch = espRtc.getLocalEpoch();
     unsigned long long secondsSinceDomeLightLastOn = espRtc.getLocalEpoch() - epochAtDomeLightLastOn;
 
-    bool domeLightState = !digitalRead(PinDefinitions::PIN_DOME_LIGHT);
+    bool domeLightState = !digitalRead(Definitions::PIN_DOME_LIGHT);
 
     if (domeLightState == HIGH)
     {

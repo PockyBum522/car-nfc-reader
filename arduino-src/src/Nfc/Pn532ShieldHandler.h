@@ -2,6 +2,7 @@
 #define COROLLA_2003_NFC_CONTROLLER_PN532SHIELDHANDLER_H
 
 #include <Arduino.h>
+#include <ESP32Time.h>
 #include <vector>
 #include "CarHelper/CarHelper.h"
 #include "External/Adafruit PN532/Adafruit_PN532.h"
@@ -16,7 +17,7 @@
 class Pn532ShieldHandler
 {
 public:
-    explicit Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, unsigned long long *epochAtLastRead);
+    explicit Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, unsigned long long *epochAtLastRead, ESP32Time *espTime);
 
     void CheckForNfcTag(const std::vector<NfcTag>& vector);
 
@@ -38,6 +39,8 @@ private:
     CarHelper *_carHelper;
 
     unsigned long long *_epochAtLastRead;
+
+    ESP32Time *_espTime;
 
     Logger *_logger;
 };

@@ -10,7 +10,8 @@ class SketchInitializers
 {
 public:
 
-    void InitializeRemotePins();
+    void Honda2008InitializeRemotePins();
+    void Corolla2003InitializeRemotePins();
 
     void InitializeSpiPins();
 

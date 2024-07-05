@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "SketchInitializers.h"
-#include "PinDefinitions.h"
+#include "Definitions.h"
 
 void SketchInitializers::InitializeSpiPins()
 {
@@ -16,14 +16,24 @@ void SketchInitializers::InitializeSpiPins()
     constexpr const static int8_t pin_miso = 7;
 }
 
-void SketchInitializers::InitializeRemotePins()
+void SketchInitializers::Honda2008InitializeRemotePins()
 {
-    pinMode(PinDefinitions::PIN_UNLOCK, OUTPUT);
-    digitalWrite(PinDefinitions::PIN_UNLOCK, HIGH);
-
-    pinMode(PinDefinitions::PIN_LOCK, OUTPUT);
-    digitalWrite(PinDefinitions::PIN_LOCK, HIGH);
-
-    pinMode(PinDefinitions::PIN_TRUNK, OUTPUT);
-    digitalWrite(PinDefinitions::PIN_LOCK, HIGH);
+    pinMode(Definitions::PIN_UNLOCK, INPUT);
+    pinMode(Definitions::PIN_LOCK, INPUT);
+    pinMode(Definitions::PIN_TRUNK, INPUT);
 }
+
+void SketchInitializers::Corolla2003InitializeRemotePins()
+{
+    pinMode(Definitions::PIN_UNLOCK, OUTPUT);
+    digitalWrite(Definitions::PIN_UNLOCK, LOW);
+
+    pinMode(Definitions::PIN_LOCK, OUTPUT);
+    digitalWrite(Definitions::PIN_LOCK, LOW);
+
+    // This is actually the alarm pin, I think
+    pinMode(Definitions::PIN_TRUNK, OUTPUT);
+    digitalWrite(Definitions::PIN_LOCK, LOW);
+}
+
+

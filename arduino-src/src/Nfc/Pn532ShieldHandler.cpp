@@ -1,22 +1,27 @@
 #include "Pn532ShieldHandler.h"
 
+#include <ESP32Time.h>
 
-Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, unsigned long long *epochAtLastRead)
+
+Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, unsigned long long *epochAtLastRead, ESP32Time *espTime)
 {
     pinMode(48, OUTPUT);
 
     _logger = logger;
     _carHelper = carHelper;
     _epochAtLastRead = epochAtLastRead;
+    _espTime = espTime;
 
     _nfc = new Adafruit_PN532(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
 }
 
 void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag>& nfcTags, bool checkVersionData)
 {
-    //digitalWrite(PinDefinitions::PIN_PN532_BOARD_POWER, HIGH);
+    digitalWrite(Definitions::PIN_PN532_BOARD_POWER, HIGH);
 
     unsigned long long millisBeforeNfcInit = millis();
+
+    delay(9); // Makes init almost twice as fast.
 
     _nfc->wakeup();
 
@@ -28,7 +33,7 @@ void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag
 
     _logger->Debug("NFC Init took: " + String(millis() - millisBeforeNfcInit) + " millis");
 
-    //digitalWrite(PinDefinitions::PIN_PN532_BOARD_POWER, LOW);
+    digitalWrite(Definitions::PIN_PN532_BOARD_POWER, LOW);
 }
 
 void Pn532ShieldHandler::CheckForNfcTag(const std::vector<NfcTag>& nfcTags)
@@ -85,9 +90,9 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
 
         Serial.println(tag.Username + " seen! Unlocking car now.");
 
-        *_epochAtLastRead = 0;
+        *_epochAtLastRead = _espTime->getLocalEpoch();
 
-        _carHelper->UnlockAllDoors();
+        _carHelper->Honda2008UnlockAllDoors();
 
         delay(1000);
     }
@@ -125,3 +130,4 @@ bool Pn532ShieldHandler::InitializeNfcShield(bool checkVersionData)
 
     return true;
 }
+

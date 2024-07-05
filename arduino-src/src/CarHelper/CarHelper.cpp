@@ -4,34 +4,59 @@ void CarHelper::UnlockDriverDoor()
 {
 //    _espNeopixel->SetBuiltInLedRGB(255, 0, 0);
 
-    digitalWrite(PinDefinitions::PIN_UNLOCK, LOW);
+    digitalWrite(Definitions::PIN_UNLOCK, LOW);
 
     delay(200);
 
-    digitalWrite(PinDefinitions::PIN_UNLOCK, HIGH);
+    digitalWrite(Definitions::PIN_UNLOCK, HIGH);
 
     delay(500);
 
 //    _espNeopixel->SetBuiltInLedRGB(0, 0, 0);
 }
 
-void CarHelper::UnlockAllDoors()
+void CarHelper::Honda2008UnlockAllDoors()
+{
+    //    _espNeopixel->SetBuiltInLedRGB(255, 0, 0);
+
+    pinMode(Definitions::PIN_UNLOCK, OUTPUT);
+    digitalWrite(Definitions::PIN_UNLOCK, LOW);
+
+    delay(500);
+
+    pinMode(Definitions::PIN_UNLOCK, INPUT);
+
+    delay(500);
+
+    pinMode(Definitions::PIN_UNLOCK, OUTPUT);
+    digitalWrite(Definitions::PIN_UNLOCK, LOW);
+
+    delay(500);
+
+    pinMode(Definitions::PIN_UNLOCK, INPUT);
+
+    delay(500);
+
+    //    _espNeopixel->SetBuiltInLedRGB(0, 0, 0);
+}
+
+void CarHelper::Corolla2003UnlockAllDoors()
 {
 //    _espNeopixel->SetBuiltInLedRGB(255, 0, 0);
 
-    digitalWrite(PinDefinitions::PIN_UNLOCK, LOW);
+    digitalWrite(Definitions::PIN_UNLOCK, HIGH);
 
     delay(300);
 
-    digitalWrite(PinDefinitions::PIN_UNLOCK, HIGH);
+    digitalWrite(Definitions::PIN_UNLOCK, LOW);
 
     delay(300);
 
-    digitalWrite(PinDefinitions::PIN_UNLOCK, LOW);
+    digitalWrite(Definitions::PIN_UNLOCK, HIGH);
 
     delay(300);
 
-    digitalWrite(PinDefinitions::PIN_UNLOCK, HIGH);
+    digitalWrite(Definitions::PIN_UNLOCK, LOW);
 
     delay(500);
 
@@ -42,11 +67,11 @@ void CarHelper::Lock()
 {
 //   _espNeopixel->SetBuiltInLedRGB(0, 255, 0);
 
-    digitalWrite(PinDefinitions::PIN_LOCK, LOW);
+    digitalWrite(Definitions::PIN_LOCK, LOW);
 
     delay(200);
 
-    digitalWrite(PinDefinitions::PIN_LOCK, HIGH);
+    digitalWrite(Definitions::PIN_LOCK, HIGH);
 
     delay(500);
 

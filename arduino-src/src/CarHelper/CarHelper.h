@@ -3,14 +3,15 @@
 
 
 #include <Arduino.h>
-#include "EspBoardHelpers/PinDefinitions.h"
+#include "EspBoardHelpers/Definitions.h"
 
 class CarHelper
 {
 public:
     void UnlockDriverDoor();
 
-    void UnlockAllDoors();
+    void Honda2008UnlockAllDoors();
+    void Corolla2003UnlockAllDoors();
 
     void Lock();
 
