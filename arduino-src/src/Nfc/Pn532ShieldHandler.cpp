@@ -2,15 +2,16 @@
 
 #include <ESP32Time.h>
 
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 
-Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, unsigned long long *epochAtLastRead, ESP32Time *espTime)
+Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime)
 {
     pinMode(48, OUTPUT);
 
     _logger = logger;
     _carHelper = carHelper;
-    _epochAtLastRead = epochAtLastRead;
-    _espTime = espTime;
+    _epochAtLastRead = *epochAtLastRead;
+    _espRtc = espTime;
 
     _nfc = new Adafruit_PN532(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
 }
@@ -34,6 +35,42 @@ void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag
     _logger->Debug("NFC Init took: " + String(millis() - millisBeforeNfcInit) + " millis");
 
     digitalWrite(Definitions::PIN_PN532_BOARD_POWER, LOW);
+
+    esp_sleep_enable_timer_wakeup(IncreasingDelayWithTime() * uS_TO_S_FACTOR);
+
+    esp_deep_sleep_start();
+}
+
+
+unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
+{
+    const unsigned long long localEpoch = _espRtc->getLocalEpoch();
+
+    const unsigned long long secondsSinceLastRead = localEpoch - _epochAtLastRead;
+
+    if (secondsSinceLastRead < 10) return 0.25;
+
+    return 3;
+
+    // logger.Information("Seconds since last read: " + String(secondsSinceLastRead));
+    // logger.Information("delayMillis: " + String(delayMillis));
+
+    //if (delayMillis < 100)  return 100;
+
+    //if (delayMillis < 3000) return delayMillis;
+
+
+
+    //    Hours	    Minutes	    Seconds     Delay millis with constant = 0.006
+    //
+    //    10	    600	        36000		216
+    //    24	    1440        86400		518.4
+    //    48	    2880        172800		1036.8
+    //    72	    4320        259200		1555.2
+    //    96	    5760        345600		2073.6
+    //    120	    7200        432000		2592
+    //    144	    8640        518400		3110.4
+    //    168	    1008    	604800		3628.8
 }
 
 void Pn532ShieldHandler::CheckForNfcTag(const std::vector<NfcTag>& nfcTags)
@@ -49,6 +86,8 @@ void Pn532ShieldHandler::CheckForNfcTag(const std::vector<NfcTag>& nfcTags)
 
     if (success)
     {
+        _epochAtLastRead = _espRtc->getLocalEpoch();
+
         checkAuthentication(uid, uidLength, nfcTags);
     }
 }
@@ -89,8 +128,6 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
         // Otherwise, we matched and authenticated!
 
         Serial.println(tag.Username + " seen! Unlocking car now.");
-
-        *_epochAtLastRead = _espTime->getLocalEpoch();
 
         _carHelper->Honda2008UnlockAllDoors();
 

@@ -17,7 +17,7 @@
 class Pn532ShieldHandler
 {
 public:
-    explicit Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, unsigned long long *epochAtLastRead, ESP32Time *espTime);
+    explicit Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime);
 
     void CheckForNfcTag(const std::vector<NfcTag>& vector);
 
@@ -26,6 +26,8 @@ public:
     bool InitializeNfcShield(bool checkVersionData = false);
 
     void CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag>& vector, bool checkVersionData = false);
+
+    unsigned long long IncreasingDelayWithTime() const;
 
 private:
 
@@ -38,9 +40,9 @@ private:
 
     CarHelper *_carHelper;
 
-    unsigned long long *_epochAtLastRead;
+    unsigned long long _epochAtLastRead;
 
-    ESP32Time *_espTime;
+    ESP32Time *_espRtc;
 
     Logger *_logger;
 };

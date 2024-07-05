@@ -42,16 +42,14 @@ void setup()
     pinMode(15, OUTPUT);
     digitalWrite(15, HIGH);
 
-
-
-      // // For power savings, set all pins not being used as inputs to outputs. It works.
-      // for (int i = 0; i < 17; i++)
-      // {
-      //   if (i == 2){ i = 3; } // Skip ss pin
-      //   if (i == 10){ i = 12; } // Skip lock/unlock pins
-      //
-      //   pinMode(i, OUTPUT);
-      // }
+    // // For power savings, set all pins not being used as inputs to outputs. It works.
+    // for (int i = 0; i < 17; i++)
+    // {
+    //   if (i == 2){ i = 3; } // Skip ss pin
+    //   if (i == 10){ i = 12; } // Skip lock/unlock pins
+    //
+    //   pinMode(i, OUTPUT);
+    // }
 
     //Serial.begin(115200);
 
@@ -61,13 +59,9 @@ void setup()
 
     logger.Information("Checking for tag and sleeping");
 
-    pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
-
     bootCount = bootCount + 1;
 
-    esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-
-    esp_deep_sleep_start();
+    pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
 }
 
 void loop()
@@ -93,74 +87,43 @@ void loop()
 
 }
 
-unsigned long long IncreasingDelayWithTimeMilliseconds()
-{
-    return 4000;
-
-    constexpr unsigned long long delayMillisConstant = 0.006;
-
-    const unsigned long long secondsSinceLastRead = espRtc.getLocalEpoch() - epochAtLastRead;
-
-    const unsigned long long delayMillis = secondsSinceLastRead * delayMillisConstant;
-
-    logger.Information("Seconds since last read: " + String(secondsSinceLastRead));
-    logger.Information("delayMillis: " + String(delayMillis));
-
-    //if (delayMillis < 100)  return 100;
-
-    //if (delayMillis < 3000) return delayMillis;
-
-
-
-    //    Hours	    Minutes	    Seconds     Delay millis with constant = 0.006
-    //
-    //    10	    600	        36000		216
-    //    24	    1440        86400		518.4
-    //    48	    2880        172800		1036.8
-    //    72	    4320        259200		1555.2
-    //    96	    5760        345600		2073.6
-    //    120	    7200        432000		2592
-    //    144	    8640        518400		3110.4
-    //    168	    1008    	604800		3628.8
-}
-
 void LockBasedOnDomeLightVoltageLoop()
 {
-    const int MINUTES = 60;
-
-    unsigned long long rtcLocalEpoch = espRtc.getLocalEpoch();
-    unsigned long long secondsSinceDomeLightLastOn = espRtc.getLocalEpoch() - epochAtDomeLightLastOn;
-
-    bool domeLightState = !digitalRead(Definitions::PIN_DOME_LIGHT);
-
-    if (domeLightState == HIGH)
-    {
-        epochAtLastRead = rtcLocalEpoch;
-        epochAtDomeLightLastOn = rtcLocalEpoch;
-
-        carLockedOnceFlag = false;
-        carLockedTwiceFlag = false;
-
-        logger.Debug("Dome light state: ON");
-    }
-
-    if (carLockedTwiceFlag) return;
-
-    if (secondsSinceDomeLightLastOn > 4 * MINUTES)
-    {
-        carHelper.Lock();
-        carLockedTwiceFlag = true;
-
-        logger.Debug("Dome light timeout: Locking car for the second time");
-    }
-
-    if (carLockedOnceFlag) return;
-
-    if (secondsSinceDomeLightLastOn > 2)
-    {
-        carHelper.Lock();
-        carLockedOnceFlag = true;
-
-        logger.Debug("Dome light timeout: Locking car for the first time");
-    }
+    // const int MINUTES = 60;
+    //
+    // unsigned long long rtcLocalEpoch = espRtc.getLocalEpoch();
+    // unsigned long long secondsSinceDomeLightLastOn = espRtc.getLocalEpoch() - epochAtDomeLightLastOn;
+    //
+    // bool domeLightState = !digitalRead(Definitions::PIN_DOME_LIGHT);
+    //
+    // if (domeLightState == HIGH)
+    // {
+    //     epochAtLastRead = rtcLocalEpoch;
+    //     epochAtDomeLightLastOn = rtcLocalEpoch;
+    //
+    //     carLockedOnceFlag = false;
+    //     carLockedTwiceFlag = false;
+    //
+    //     logger.Debug("Dome light state: ON");
+    // }
+    //
+    // if (carLockedTwiceFlag) return;
+    //
+    // if (secondsSinceDomeLightLastOn > 4 * MINUTES)
+    // {
+    //     carHelper.Lock();
+    //     carLockedTwiceFlag = true;
+    //
+    //     logger.Debug("Dome light timeout: Locking car for the second time");
+    // }
+    //
+    // if (carLockedOnceFlag) return;
+    //
+    // if (secondsSinceDomeLightLastOn > 2)
+    // {
+    //     carHelper.Lock();
+    //     carLockedOnceFlag = true;
+    //
+    //     logger.Debug("Dome light timeout: Locking car for the first time");
+    // }
 }
