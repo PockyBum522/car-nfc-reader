@@ -51,7 +51,7 @@ void setup()
     //   pinMode(i, OUTPUT);
     // }
 
-    //Serial.begin(115200);
+    Serial.begin(115200);
 
     sketchInitializers.InitializeSpiPins();
 
@@ -61,7 +61,7 @@ void setup()
 
     bootCount = bootCount + 1;
 
-    pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
+    //pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
 }
 
 void loop()
