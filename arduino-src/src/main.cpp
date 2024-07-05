@@ -42,6 +42,8 @@ void setup()
     pinMode(15, OUTPUT);
     digitalWrite(15, HIGH);
 
+    pinMode(10, INPUT_PULLDOWN);
+
     // // For power savings, set all pins not being used as inputs to outputs. It works.
     // for (int i = 0; i < 17; i++)
     // {
@@ -61,11 +63,13 @@ void setup()
 
     bootCount = bootCount + 1;
 
-    //pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
+    pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
 }
 
 void loop()
 {
+    Serial.println(digitalRead(10));
+
     // // If it hasn't been 12 hours yet, just run a constant loop
     // while (IncreasingDelayWithTimeMilliseconds() < 250)
 

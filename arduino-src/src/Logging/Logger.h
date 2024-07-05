@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <utility>
-#include "models/LogLevelEnum.h"
+#include "../Models/LogLevelEnum.h"
 
 #define GetOriginalFileAndLine() FileAndLine(__LINE__, __FILE__)
 

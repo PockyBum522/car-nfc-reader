@@ -8,8 +8,8 @@
 class Definitions
 {
 public:
-    static constexpr int PIN_UNLOCK = 42;
-    static constexpr int PIN_LOCK = 41;
+    static constexpr int PIN_UNLOCK = 41;
+    static constexpr int PIN_LOCK = 42;
     static constexpr int PIN_TRUNK = 40;
 
     static constexpr int PIN_PN532_BOARD_POWER = 15;

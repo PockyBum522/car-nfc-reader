@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="CidrRootsConfiguration">
+    <sourceRoots>
+      <file path="$PROJECT_DIR$/src/CarHelper" />
+      <file path="$PROJECT_DIR$/src/EspBoardHelpers" />
+      <file path="$PROJECT_DIR$/src/External" />
+      <file path="$PROJECT_DIR$/src/Logging" />
+      <file path="$PROJECT_DIR$/src/Models" />
+      <file path="$PROJECT_DIR$/src/Nfc" />
+      <file path="$PROJECT_DIR$/src/Secrets" />
+    </sourceRoots>
+  </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="PlatformIOSettings">
     <option name="linkedExternalProjectsSettings">
