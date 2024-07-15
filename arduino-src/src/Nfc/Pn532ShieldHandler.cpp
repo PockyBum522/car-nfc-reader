@@ -10,7 +10,7 @@ Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, con
 
     _logger = logger;
     _carHelper = carHelper;
-    _epochAtLastRead = *epochAtLastRead;
+    EpochOfLastReset = *epochAtLastRead;
     _espRtc = espTime;
 
     _nfc = new Adafruit_PN532(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
@@ -46,19 +46,19 @@ unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
 {
     const unsigned long long localEpoch = _espRtc->getLocalEpoch();
 
-    const unsigned long long secondsSinceLastRead = localEpoch - _epochAtLastRead;
+    const unsigned long long secondsSinceLastReset = localEpoch - EpochOfLastReset;
 
-    if (secondsSinceLastRead < 5) return 0.25;
 
-    return 1;
+    // If less than 24 hours, return value multiplied by a smaller constant
+    if (secondsSinceLastReset < 86400)
+        return secondsSinceLastReset * 0.006;
 
-    // logger.Information("Seconds since last read: " + String(secondsSinceLastRead));
-    // logger.Information("delayMillis: " + String(delayMillis));
+    // If less than 72 hours, return value multiplied by the delay constant
+    if (secondsSinceLastReset < 259200)
+        return secondsSinceLastReset * 0.01;
 
-    //if (delayMillis < 100)  return 100;
-
-    //if (delayMillis < 3000) return delayMillis;
-
+    // If more than 72 hours, return 4 seconds
+    return 4;
 
 
     //    Hours	    Minutes	    Seconds     Delay millis with constant = 0.006
@@ -86,7 +86,7 @@ void Pn532ShieldHandler::CheckForNfcTag(const std::vector<NfcTag>& nfcTags)
 
     if (success)
     {
-        _epochAtLastRead = _espRtc->getLocalEpoch();
+        EpochOfLastReset = _espRtc->getLocalEpoch();
 
         checkAuthentication(uid, uidLength, nfcTags);
     }

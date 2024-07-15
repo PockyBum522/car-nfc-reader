@@ -34,9 +34,6 @@ auto sketchInitializers = *new SketchInitializers();
 auto carHelper = *new CarHelper();
 auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc);
 
-void LockBasedOnDomeLightVoltageLoop();
-unsigned long long IncreasingDelayWithTimeMilliseconds();
-
 void checkDomeLight();
 
 void setup()
@@ -70,10 +67,6 @@ void setup()
 
     pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
 }
-
-// TODO: Make it so either detecting a door being open
-// OR
-// Detecting a card read will reset the delay between to deep sleep loops to being as fast as possible
 
 void loop()
 {
@@ -141,6 +134,7 @@ void checkDomeLight()
     if (doorOpen)
     {
         epochAtLastDoorOpened = espRtc.getLocalEpoch();
+        pn532ShieldHandler.EpochOfLastReset = espRtc.getLocalEpoch();
 
         carLockedOnceFlag = false;
         carLockedTwiceFlag = false;
@@ -151,45 +145,4 @@ void checkDomeLight()
 
     Serial.println();
     Serial.println();
-}
-
-void LockBasedOnDomeLightVoltageLoop()
-{
-    // const int MINUTES = 60;
-    //
-    // unsigned long long rtcLocalEpoch = espRtc.getLocalEpoch();
-    // unsigned long long secondsSinceDomeLightLastOn = espRtc.getLocalEpoch() - epochAtDomeLightLastOn;
-    //
-    // bool domeLightState = !digitalRead(Definitions::PIN_DOME_LIGHT);
-    //
-    // if (domeLightState == HIGH)
-    // {
-    //     epochAtLastRead = rtcLocalEpoch;
-    //     epochAtDomeLightLastOn = rtcLocalEpoch;
-    //
-    //     carLockedOnceFlag = false;
-    //     carLockedTwiceFlag = false;
-    //
-    //     logger.Debug("Dome light state: ON");
-    // }
-    //
-    // if (carLockedTwiceFlag) return;
-    //
-    // if (secondsSinceDomeLightLastOn > 4 * MINUTES)
-    // {
-    //     carHelper.Lock();
-    //     carLockedTwiceFlag = true;
-    //
-    //     logger.Debug("Dome light timeout: Locking car for the second time");
-    // }
-    //
-    // if (carLockedOnceFlag) return;
-    //
-    // if (secondsSinceDomeLightLastOn > 2)
-    // {
-    //     carHelper.Lock();
-    //     carLockedOnceFlag = true;
-    //
-    //     logger.Debug("Dome light timeout: Locking car for the first time");
-    // }
 }

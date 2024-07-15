@@ -29,6 +29,8 @@ public:
 
     unsigned long long IncreasingDelayWithTime() const;
 
+    unsigned long long EpochOfLastReset;
+
 private:
 
     Adafruit_PN532 *_nfc;
@@ -39,8 +41,6 @@ private:
     String decToHex(byte decValue, byte desiredStringLength);
 
     CarHelper *_carHelper;
-
-    unsigned long long _epochAtLastRead;
 
     ESP32Time *_espRtc;
 
