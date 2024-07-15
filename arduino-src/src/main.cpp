@@ -19,7 +19,7 @@ RTC_DATA_ATTR int bootCount = 0;
 
 // RTC memory persistent variables
 RTC_DATA_ATTR unsigned long long epochAtLastRead = 0;
-RTC_DATA_ATTR unsigned long long epochAtDomeLightLastOn = 0;
+RTC_DATA_ATTR unsigned long long epochAtLastDoorOpened = 0;
 
 RTC_DATA_ATTR bool carLockedOnceFlag = false;
 RTC_DATA_ATTR bool carLockedTwiceFlag = false;
@@ -37,12 +37,15 @@ auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtL
 void LockBasedOnDomeLightVoltageLoop();
 unsigned long long IncreasingDelayWithTimeMilliseconds();
 
+void checkDomeLight();
+
 void setup()
 {
     pinMode(15, OUTPUT);
     digitalWrite(15, HIGH);
 
-    pinMode(10, INPUT_PULLDOWN);
+    pinMode(10, INPUT);
+    pinMode(1, INPUT_PULLUP);
 
     // // For power savings, set all pins not being used as inputs to outputs. It works.
     // for (int i = 0; i < 17; i++)
@@ -63,13 +66,17 @@ void setup()
 
     bootCount = bootCount + 1;
 
+    checkDomeLight();
+
     pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
 }
 
+// TODO: Make it so either detecting a door being open
+// OR
+// Detecting a card read will reset the delay between to deep sleep loops to being as fast as possible
+
 void loop()
 {
-    Serial.println(digitalRead(10));
-
     // // If it hasn't been 12 hours yet, just run a constant loop
     // while (IncreasingDelayWithTimeMilliseconds() < 250)
 
@@ -89,6 +96,61 @@ void loop()
     //     pn532ShieldHandler.CheckForNfcTag(Secrets::authorizedNfcTags);
     // }
 
+}
+
+void checkDomeLight()
+{
+    const unsigned long long localEpoch = espRtc.getLocalEpoch();
+
+    const unsigned long long secondsSinceLastDoorOpen = localEpoch - epochAtLastDoorOpened;
+
+    int domePinRead = analogRead(10);
+    bool doorOpen = domePinRead < 460;
+
+    Serial.println();
+    Serial.println();
+
+    Serial.print("domePinRead: ");
+    Serial.println(domePinRead);
+
+    Serial.print("doorOpen: ");
+    Serial.println(doorOpen);
+
+    Serial.print("Current RTC epoch: ");
+    Serial.println(localEpoch);
+
+    Serial.print("secondsSinceLastDoorOpen: ");
+    Serial.println(secondsSinceLastDoorOpen);
+
+    if (!carLockedOnceFlag &&
+        secondsSinceLastDoorOpen > 30)
+    {
+        carHelper.Honda2008LockAllDoors();
+
+        carLockedOnceFlag = true;
+    }
+
+    if (!carLockedTwiceFlag &&
+        secondsSinceLastDoorOpen > 60)
+    {
+        carHelper.Honda2008LockAllDoors();
+
+        carLockedTwiceFlag = true;
+    }
+
+    if (doorOpen)
+    {
+        epochAtLastDoorOpened = espRtc.getLocalEpoch();
+
+        carLockedOnceFlag = false;
+        carLockedTwiceFlag = false;
+    }
+
+    Serial.print("Pin 1: ");
+    Serial.println(digitalRead(1));
+
+    Serial.println();
+    Serial.println();
 }
 
 void LockBasedOnDomeLightVoltageLoop()

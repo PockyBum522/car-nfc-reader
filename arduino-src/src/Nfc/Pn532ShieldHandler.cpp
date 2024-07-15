@@ -48,9 +48,9 @@ unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
 
     const unsigned long long secondsSinceLastRead = localEpoch - _epochAtLastRead;
 
-    if (secondsSinceLastRead < 10) return 0.25;
+    if (secondsSinceLastRead < 5) return 0.25;
 
-    return 3;
+    return 1;
 
     // logger.Information("Seconds since last read: " + String(secondsSinceLastRead));
     // logger.Information("delayMillis: " + String(delayMillis));

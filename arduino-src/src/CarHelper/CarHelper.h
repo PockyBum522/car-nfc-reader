@@ -11,6 +11,7 @@ public:
     void UnlockDriverDoor();
 
     void Honda2008UnlockAllDoors();
+    void Honda2008LockAllDoors();
     void Corolla2003UnlockAllDoors();
 
     void Lock();
