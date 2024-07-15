@@ -1,21 +1,19 @@
 #ifndef COROLLA_2003_NFC_CONTROLLER_CARHELPER_H
 #define COROLLA_2003_NFC_CONTROLLER_CARHELPER_H
 
-
 #include <Arduino.h>
 #include "EspBoardHelpers/Definitions.h"
 
 class CarHelper
 {
 public:
-    void UnlockDriverDoor();
+    static void UnlockAllDoors();
+    static void LockAllDoors();
 
-    void Honda2008UnlockAllDoors();
-    void Honda2008LockAllDoors();
-    void Corolla2003UnlockAllDoors();
+    explicit CarHelper(const String &whichCar);
 
-    void Lock();
-
+private:
+    static String _whichCar;
 };
 
 

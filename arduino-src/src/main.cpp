@@ -7,31 +7,32 @@
 #include "CarHelper/CarHelper.h"
 #include "Logging/Logger.h"
 
+//#define DEBUG_SERIAL_ON
 
-// Constants
-#define microsToMillis 10000                    /* Conversion factor for micro seconds to milliseconds */
+// Uncomment one:
+const String whichCar = "CAR_IS_2008_HONDA";
+//const String whichCar = "CAR_IS_2003_COROLLA";
+//const String whichCar = "CAR_IS_2021_COROLLA";
 
+#define microsToMillis 10000                    /* CoSnversion factor for micro seconds to milliseconds */
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  3        /* Time ESP32 will go to sleep (in seconds) */
 
 RTC_DATA_ATTR int bootCount = 0;
 
-// RTC memory persistent variables
 RTC_DATA_ATTR unsigned long long epochAtLastRead = 0;
 RTC_DATA_ATTR unsigned long long epochAtLastDoorOpened = 0;
 
 RTC_DATA_ATTR bool carLockedOnceFlag = false;
 RTC_DATA_ATTR bool carLockedTwiceFlag = false;
 
-bool runOnce = false;
-
 // Dependency setup
 auto logger = *new Logger(LogLevel::Information); // Change this to fatal for what probably amounts to an imperceptibly faster time
 
 ESP32Time espRtc(0);
 auto sketchInitializers = *new SketchInitializers();
-auto carHelper = *new CarHelper();
+auto carHelper = *new CarHelper(whichCar);
 auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc);
 
 void checkDomeLight();
@@ -53,7 +54,9 @@ void setup()
     //   pinMode(i, OUTPUT);
     // }
 
+#ifdef DEBUG_SERIAL_ON
     Serial.begin(115200);
+#endif
 
     sketchInitializers.InitializeSpiPins();
 
@@ -91,15 +94,22 @@ void loop()
 
 }
 
-void checkDomeLight()
+void checkDomeLight(const String &whichCar)
 {
     const unsigned long long localEpoch = espRtc.getLocalEpoch();
 
     const unsigned long long secondsSinceLastDoorOpen = localEpoch - epochAtLastDoorOpened;
 
-    int domePinRead = analogRead(10);
-    bool doorOpen = domePinRead < 460;
+    int domePinRead = 999;
+    bool doorOpen = false;
 
+    if (whichCar == "CAR_IS_2008_HONDA")
+    {
+        domePinRead = analogRead(10);
+        doorOpen = domePinRead < 460;
+    }
+
+#ifdef DEBUG_SERIAL_ON
     Serial.println();
     Serial.println();
 
@@ -114,11 +124,12 @@ void checkDomeLight()
 
     Serial.print("secondsSinceLastDoorOpen: ");
     Serial.println(secondsSinceLastDoorOpen);
+#endif
 
     if (!carLockedOnceFlag &&
         secondsSinceLastDoorOpen > 30)
     {
-        carHelper.Honda2008LockAllDoors();
+        CarHelper::LockAllDoors();
 
         carLockedOnceFlag = true;
     }
@@ -126,7 +137,7 @@ void checkDomeLight()
     if (!carLockedTwiceFlag &&
         secondsSinceLastDoorOpen > 60)
     {
-        carHelper.Honda2008LockAllDoors();
+        CarHelper::LockAllDoors();
 
         carLockedTwiceFlag = true;
     }
@@ -140,9 +151,11 @@ void checkDomeLight()
         carLockedTwiceFlag = false;
     }
 
+#ifdef DEBUG_SERIAL_ON
     Serial.print("Pin 1: ");
     Serial.println(digitalRead(1));
 
     Serial.println();
     Serial.println();
+#endif
 }

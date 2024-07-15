@@ -119,7 +119,9 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
 
     snprintf (msg, 50, "%s", converted);
 
+#ifdef DEBUG_SERIAL_ON
     Serial.println("New UID read: " + String(msg));
+#endif
 
     for (const auto& tag : nfcTags)
     {
@@ -127,9 +129,11 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
 
         // Otherwise, we matched and authenticated!
 
+#ifdef DEBUG_SERIAL_ON
         Serial.println(tag.Username + " seen! Unlocking car now.");
+#endif
 
-        _carHelper->Honda2008UnlockAllDoors();
+        CarHelper::UnlockAllDoors();
 
         delay(1000);
     }
