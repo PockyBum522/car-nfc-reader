@@ -10,9 +10,9 @@
 //#define DEBUG_SERIAL_ON
 
 // Uncomment one:
-const String whichCar = "CAR_IS_2008_HONDA";
-//const String whichCar = "CAR_IS_2003_COROLLA";
-//const String whichCar = "CAR_IS_2021_COROLLA";
+String whichCar = "CAR_IS_2008_HONDA";
+//String whichCar = "CAR_IS_2003_COROLLA";
+//String whichCar = "CAR_IS_2021_COROLLA";
 
 #define microsToMillis 10000                    /* CoSnversion factor for micro seconds to milliseconds */
 
@@ -32,10 +32,10 @@ auto logger = *new Logger(LogLevel::Information); // Change this to fatal for wh
 
 ESP32Time espRtc(0);
 auto sketchInitializers = *new SketchInitializers();
-auto carHelper = *new CarHelper(whichCar);
+auto carHelper = *new CarHelper(&whichCar);
 auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc);
 
-void checkDomeLight();
+void checkDomeLight(const String &whichCar);
 
 void setup()
 {
@@ -66,7 +66,7 @@ void setup()
 
     bootCount = bootCount + 1;
 
-    checkDomeLight();
+    checkDomeLight(whichCar);
 
     pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
 }
@@ -129,7 +129,7 @@ void checkDomeLight(const String &whichCar)
     if (!carLockedOnceFlag &&
         secondsSinceLastDoorOpen > 30)
     {
-        CarHelper::LockAllDoors();
+        carHelper.LockAllDoors();
 
         carLockedOnceFlag = true;
     }
@@ -137,7 +137,7 @@ void checkDomeLight(const String &whichCar)
     if (!carLockedTwiceFlag &&
         secondsSinceLastDoorOpen > 60)
     {
-        CarHelper::LockAllDoors();
+        carHelper.LockAllDoors();
 
         carLockedTwiceFlag = true;
     }

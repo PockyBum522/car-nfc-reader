@@ -7,13 +7,13 @@
 class CarHelper
 {
 public:
-    static void UnlockAllDoors();
-    static void LockAllDoors();
+    explicit CarHelper(String *whichCarIn);
 
-    explicit CarHelper(const String &whichCar);
+    void UnlockAllDoors() const;
+    void LockAllDoors() const;
 
 private:
-    static String _whichCar;
+    String *whichCar;
 };
 
 

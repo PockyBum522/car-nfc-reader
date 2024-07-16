@@ -1,13 +1,13 @@
 #include "CarHelper.h"
 
-CarHelper::CarHelper(const String &whichCar)
+CarHelper::CarHelper(String *whichCarIn)
 {
-    _whichCar = whichCar;
+    whichCar = whichCarIn;
 }
 
-void CarHelper::UnlockAllDoors()
+void CarHelper::UnlockAllDoors() const
 {
-    if (_whichCar == "CAR_IS_2008_HONDA")
+    if (whichCar->equals("CAR_IS_2008_HONDA"))
     {
         pinMode(Definitions::PIN_UNLOCK, OUTPUT);
         digitalWrite(Definitions::PIN_UNLOCK, LOW);
@@ -30,9 +30,9 @@ void CarHelper::UnlockAllDoors()
 
 }
 
-void CarHelper::LockAllDoors()
+void CarHelper::LockAllDoors() const
 {
-    if (_whichCar == "CAR_IS_2008_HONDA")
+    if (whichCar->equals("CAR_IS_2008_HONDA"))
     {
         pinMode(Definitions::PIN_LOCK, OUTPUT);
         digitalWrite(Definitions::PIN_LOCK, LOW);

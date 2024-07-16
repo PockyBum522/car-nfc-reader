@@ -133,7 +133,7 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
         Serial.println(tag.Username + " seen! Unlocking car now.");
 #endif
 
-        CarHelper::UnlockAllDoors();
+        _carHelper->UnlockAllDoors();
 
         delay(1000);
     }

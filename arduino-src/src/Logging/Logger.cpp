@@ -57,6 +57,7 @@ void Logger::WriteLogLine(const String &message, const String &logLevelAbbreviat
 
     String paddedMillis = GetPaddedMillis(8);
 
+#ifdef DEBUG_SERIAL_ON
     Serial.print("[");
     Serial.print(paddedMillis);
     Serial.print("]");
@@ -69,6 +70,7 @@ void Logger::WriteLogLine(const String &message, const String &logLevelAbbreviat
     Serial.print(": ");
 
     Serial.println(message);
+#endif
 }
 
 String Logger::FormatFileAndLine(const FileAndLine &originalFileAndLine)
