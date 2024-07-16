@@ -14,8 +14,6 @@ public:
 
     static constexpr int PIN_PN532_BOARD_POWER = 15;
 
-    static constexpr int PIN_IMU_BOARD_POWER = 47;
-
     static constexpr int PIN_DOME_LIGHT = 10;
 
 	// 2003 Corolla:

@@ -9,13 +9,8 @@
 class SketchInitializers
 {
 public:
-
-    void Honda2008InitializeRemotePins();
-    void Corolla2003InitializeRemotePins();
-
-    void InitializeSpiPins();
-
-    void InitializeImuPins();
+    static void InitializeSpiPins();
+    static void InitializeRemotePins(const String &whichCar);
 };
 
 

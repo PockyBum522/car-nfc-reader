@@ -9,7 +9,7 @@
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <ElegantOTA.h>
 
-bool debugSerialOn = true;
+bool debugSerialOn = false;
 
 // Uncomment one:
 String whichCar = "2008_HONDA";
@@ -43,11 +43,12 @@ void setup()
     if (debugSerialOn)
         Serial.begin(115200);
 
-    pinMode(15, OUTPUT);
-    digitalWrite(15, HIGH);
+    pinMode(Definitions::PIN_PN532_BOARD_POWER, OUTPUT);
+    digitalWrite(Definitions::PIN_PN532_BOARD_POWER, HIGH);
 
-    pinMode(10, INPUT);
-    pinMode(1, INPUT_PULLUP);
+    pinMode(Definitions::PIN_DOME_LIGHT, INPUT);
+
+    //pinMode(1, INPUT_PULLUP); // This worked for testing the toggle switch
 
     if (espRtc.getLocalEpoch() < wifiPortalTimeout)
     {
@@ -76,9 +77,9 @@ void setup()
     //   pinMode(i, OUTPUT);
     // }
 
-    sketchInitializers.InitializeSpiPins();
+    SketchInitializers::InitializeSpiPins();
 
-    sketchInitializers.Honda2008InitializeRemotePins();
+    SketchInitializers::InitializeRemotePins(whichCar);
 }
 
 void loop()
@@ -127,7 +128,7 @@ void checkDomeLight(const String &whichCar)
 
     if (whichCar == "2008_HONDA")
     {
-        domePinRead = analogRead(10);
+        domePinRead = analogRead(Definitions::PIN_DOME_LIGHT);
         doorOpen = domePinRead < 460;
     }
 

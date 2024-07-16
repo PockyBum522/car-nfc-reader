@@ -16,24 +16,26 @@ void SketchInitializers::InitializeSpiPins()
     constexpr const static int8_t pin_miso = 7;
 }
 
-void SketchInitializers::Honda2008InitializeRemotePins()
+void SketchInitializers::InitializeRemotePins(const String &whichCar)
 {
-    pinMode(Definitions::PIN_UNLOCK, INPUT);
-    pinMode(Definitions::PIN_LOCK, INPUT);
-    pinMode(Definitions::PIN_TRUNK, INPUT);
+    if (whichCar == String("2008_HONDA"))
+    {
+        pinMode(Definitions::PIN_UNLOCK, INPUT);
+        pinMode(Definitions::PIN_LOCK, INPUT);
+        pinMode(Definitions::PIN_TRUNK, INPUT);
+    }
+
+    if (whichCar == String("2003_COROLLA"))
+    {
+        pinMode(Definitions::PIN_UNLOCK, OUTPUT);
+        digitalWrite(Definitions::PIN_UNLOCK, LOW);
+
+        pinMode(Definitions::PIN_LOCK, OUTPUT);
+        digitalWrite(Definitions::PIN_LOCK, LOW);
+
+        // This is actually the alarm pin, I think
+        pinMode(Definitions::PIN_TRUNK, OUTPUT);
+        digitalWrite(Definitions::PIN_LOCK, LOW);
+    }
 }
-
-void SketchInitializers::Corolla2003InitializeRemotePins()
-{
-    pinMode(Definitions::PIN_UNLOCK, OUTPUT);
-    digitalWrite(Definitions::PIN_UNLOCK, LOW);
-
-    pinMode(Definitions::PIN_LOCK, OUTPUT);
-    digitalWrite(Definitions::PIN_LOCK, LOW);
-
-    // This is actually the alarm pin, I think
-    pinMode(Definitions::PIN_TRUNK, OUTPUT);
-    digitalWrite(Definitions::PIN_LOCK, LOW);
-}
-
 
