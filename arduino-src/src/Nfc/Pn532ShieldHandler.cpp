@@ -53,11 +53,11 @@ void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag
 
 unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
 {
-    const unsigned long long microsToSecondsFactor = 1000000;
-
     const unsigned long long localEpoch = _espRtc->getLocalEpoch();
 
     const unsigned long long secondsSinceLastReset = localEpoch - EpochOfLastReset;
+
+    constexpr int multipleForMicros = 1000;
 
     if (_debugSerialOn)
     {
@@ -65,20 +65,19 @@ unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
         Serial.println(String("localEpoch: ") + String(localEpoch));
         Serial.println(String("secondsSinceLastReset: ") + String(secondsSinceLastReset));
         Serial.println(String("secondsSinceLastReset * 0.006: ") + String(secondsSinceLastReset * 0.006));
-        Serial.println(String("secondsSinceLastReset * 0.006 * uS_TO_S_FACTOR: ") + String(secondsSinceLastReset * 0.006 * microsToSecondsFactor));
+        Serial.println(String("secondsSinceLastReset * 0.006 * multipleForMicros: ") + String(secondsSinceLastReset * 0.006 * multipleForMicros));
     }
 
     // If less than 24 hours, return value multiplied by a smaller constant
     if (secondsSinceLastReset < 86400)
-        return secondsSinceLastReset * 0.006;
+        return secondsSinceLastReset * 0.005 * multipleForMicros;
 
     // If less than 72 hours, return value multiplied by the delay constant
     if (secondsSinceLastReset < 259200)
-        return secondsSinceLastReset * 0.01;
+        return secondsSinceLastReset * 0.007 * multipleForMicros;
 
     // If more than 72 hours, return 4 seconds
-    return 4 * microsToSecondsFactor;
-
+    return 4000000;
 
     //    Hours	    Minutes	    Seconds     Delay millis with constant = 0.006
     //
