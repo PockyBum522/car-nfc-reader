@@ -9,7 +9,7 @@
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <ElegantOTA.h>
 
-bool debugSerialOn = false;
+bool debugSerialOn = true;
 
 // Uncomment one:
 String whichCar = "2008_HONDA";
@@ -18,8 +18,6 @@ String whichCar = "2008_HONDA";
 
 // How long until it stops being able to get OTA updates after a reset
 constexpr int wifiPortalTimeout = 1200;    // 1200s = 20 minutes
-
-#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 
 RTC_DATA_ATTR unsigned long long epochAtLastRead = 0;
 RTC_DATA_ATTR unsigned long long epochAtLastDoorOpened = 0;
@@ -97,7 +95,7 @@ void loop()
 
         if (debugSerialOn)
         {
-            Serial.print("UNDER 10m threshold time: ");
+            Serial.print("UNDER threshold time: ");
             Serial.println(espRtc.getLocalEpoch());
         }
 
@@ -110,7 +108,7 @@ void loop()
 
         if (debugSerialOn)
         {
-            Serial.print("Over 10m threshold time, should be no more AP: ");
+            Serial.print("Over threshold time, should be no more AP: ");
             Serial.println(espRtc.getLocalEpoch());
         }
 

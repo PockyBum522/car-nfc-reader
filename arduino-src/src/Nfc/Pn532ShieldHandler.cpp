@@ -2,8 +2,6 @@
 
 #include <ESP32Time.h>
 
-#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-
 Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime, bool debugSerialOn)
 {
     pinMode(48, OUTPUT);
@@ -35,11 +33,18 @@ void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag
 
     _logger->Debug("NFC Init took: " + String(millis() - millisBeforeNfcInit) + " millis");
 
+    unsigned long long microsToSleep = IncreasingDelayWithTime();
+
+    if (_debugSerialOn)
+    {
+        Serial.println(String("about to sleep for x microseconds: " + String(microsToSleep)));
+    }
+
     digitalWrite(Definitions::PIN_PN532_BOARD_POWER, LOW);
 
     if (deepSleep)
     {
-        esp_sleep_enable_timer_wakeup(IncreasingDelayWithTime() * uS_TO_S_FACTOR);
+        esp_sleep_enable_timer_wakeup(microsToSleep);
 
         esp_deep_sleep_start();
     }
@@ -48,6 +53,8 @@ void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag
 
 unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
 {
+    const unsigned long long microsToSecondsFactor = 1000000;
+
     const unsigned long long localEpoch = _espRtc->getLocalEpoch();
 
     const unsigned long long secondsSinceLastReset = localEpoch - EpochOfLastReset;
@@ -55,9 +62,10 @@ unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
     if (_debugSerialOn)
     {
         Serial.println();
-        Serial.println("localEpoch: " + localEpoch);
-        Serial.println("secondsSinceLastReset: " + secondsSinceLastReset);
-        Serial.println("secondsSinceLastReset * 0.006: " + secondsSinceLastReset * 0.006);
+        Serial.println(String("localEpoch: ") + String(localEpoch));
+        Serial.println(String("secondsSinceLastReset: ") + String(secondsSinceLastReset));
+        Serial.println(String("secondsSinceLastReset * 0.006: ") + String(secondsSinceLastReset * 0.006));
+        Serial.println(String("secondsSinceLastReset * 0.006 * uS_TO_S_FACTOR: ") + String(secondsSinceLastReset * 0.006 * microsToSecondsFactor));
     }
 
     // If less than 24 hours, return value multiplied by a smaller constant
@@ -69,7 +77,7 @@ unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
         return secondsSinceLastReset * 0.01;
 
     // If more than 72 hours, return 4 seconds
-    return 4;
+    return 4 * microsToSecondsFactor;
 
 
     //    Hours	    Minutes	    Seconds     Delay millis with constant = 0.006
