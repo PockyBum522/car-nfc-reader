@@ -17,7 +17,7 @@ String whichCar = "2008_HONDA";
 //String whichCar = "2021_COROLLA";
 
 // How long until it stops being able to get OTA updates after a reset
-constexpr int wifiPortalTimeout = 600;
+constexpr int wifiPortalTimeout = 1200;    // 1200s = 20 minutes
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 
