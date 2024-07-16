@@ -10,7 +10,8 @@
 class Secrets
 {
 public:
-    static std::vector<NfcTag> authorizedNfcTags;
+    static std::vector<NfcTag> AuthorizedNfcTags;
+    static String WifiPsk;
 };
 
 

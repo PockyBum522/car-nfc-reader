@@ -6,8 +6,9 @@
 #include "Nfc/Pn532ShieldHandler.h"
 #include "CarHelper/CarHelper.h"
 #include "Logging/Logger.h"
+#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 
-//#define DEBUG_SERIAL_ON
+bool debugSerialOn = true;
 
 // Uncomment one:
 String whichCar = "CAR_IS_2008_HONDA";
@@ -28,22 +29,35 @@ RTC_DATA_ATTR bool carLockedOnceFlag = false;
 RTC_DATA_ATTR bool carLockedTwiceFlag = false;
 
 // Dependency setup
-auto logger = *new Logger(LogLevel::Information); // Change this to fatal for what probably amounts to an imperceptibly faster time
+auto logger = *new Logger(Information, &debugSerialOn);
 
 ESP32Time espRtc(0);
 auto sketchInitializers = *new SketchInitializers();
 auto carHelper = *new CarHelper(&whichCar);
-auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc);
+auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc, &debugSerialOn);
+
+WiFiManager wifiManager;
 
 void checkDomeLight(const String &whichCar);
 
 void setup()
 {
+    if (debugSerialOn)
+        Serial.begin(115200);
+
     pinMode(15, OUTPUT);
     digitalWrite(15, HIGH);
 
     pinMode(10, INPUT);
     pinMode(1, INPUT_PULLUP);
+
+    if (espRtc.getLocalEpoch() < 600)
+    {
+        // If less than 10 minutes since last board reset, let wifiManager do its thing
+        wifiManager.setConfigPortalBlocking(false);
+        wifiManager.setMinimumSignalQuality(20);
+        wifiManager.autoConnect("2008_HONDA", Secrets::WifiPsk.c_str());
+    }
 
     // // For power savings, set all pins not being used as inputs to outputs. It works.
     // for (int i = 0; i < 17; i++)
@@ -54,10 +68,6 @@ void setup()
     //   pinMode(i, OUTPUT);
     // }
 
-#ifdef DEBUG_SERIAL_ON
-    Serial.begin(115200);
-#endif
-
     sketchInitializers.InitializeSpiPins();
 
     sketchInitializers.Honda2008InitializeRemotePins();
@@ -65,33 +75,32 @@ void setup()
     logger.Information("Checking for tag and sleeping");
 
     bootCount = bootCount + 1;
-
-    checkDomeLight(whichCar);
-
-    pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::authorizedNfcTags, true);
 }
 
 void loop()
 {
-    // // If it hasn't been 12 hours yet, just run a constant loop
-    // while (IncreasingDelayWithTimeMilliseconds() < 250)
+    if (espRtc.getLocalEpoch() < 600)
+    {
+        // If less than 10 minutes since last board reset, let wifiManager do its thing then check for NFC tags and DON'T deep sleep the board
+        wifiManager.process();
 
-    // Testing @ 30min
-    // while (IncreasingDelayWithTimeMilliseconds() < 10)
-    // {
-    //     if (!runOnce)
-    //     {
-    //         delay(100);
-    //
-    //         pn532ShieldHandler.InitializeNfcShield(true);
-    //
-    //         runOnce = true;
-    //     }
-    //
-    //     logger.Information("Checking in while loop");
-    //     pn532ShieldHandler.CheckForNfcTag(Secrets::authorizedNfcTags);
-    // }
+        checkDomeLight(whichCar);
 
+        Serial.print("UNDER 10m threshold time: ");
+        Serial.println(espRtc.getLocalEpoch());
+
+        pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, false);
+    }
+    else
+    {
+        // If more than 10 minutes since last board reset, then just check for tag then deep sleep
+        checkDomeLight(whichCar);
+
+        Serial.print("Over 10m threshold time, should be no more AP: ");
+        Serial.println(espRtc.getLocalEpoch());
+
+        pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, true);
+    }
 }
 
 void checkDomeLight(const String &whichCar)
@@ -109,22 +118,23 @@ void checkDomeLight(const String &whichCar)
         doorOpen = domePinRead < 460;
     }
 
-#ifdef DEBUG_SERIAL_ON
-    Serial.println();
-    Serial.println();
+    if (debugSerialOn)
+    {
+        Serial.println();
+        Serial.println();
 
-    Serial.print("domePinRead: ");
-    Serial.println(domePinRead);
+        Serial.print("domePinRead: ");
+        Serial.println(domePinRead);
 
-    Serial.print("doorOpen: ");
-    Serial.println(doorOpen);
+        Serial.print("doorOpen: ");
+        Serial.println(doorOpen);
 
-    Serial.print("Current RTC epoch: ");
-    Serial.println(localEpoch);
+        Serial.print("Current RTC epoch: ");
+        Serial.println(localEpoch);
 
-    Serial.print("secondsSinceLastDoorOpen: ");
-    Serial.println(secondsSinceLastDoorOpen);
-#endif
+        Serial.print("secondsSinceLastDoorOpen: ");
+        Serial.println(secondsSinceLastDoorOpen);
+    }
 
     if (!carLockedOnceFlag &&
         secondsSinceLastDoorOpen > 30)
@@ -151,11 +161,12 @@ void checkDomeLight(const String &whichCar)
         carLockedTwiceFlag = false;
     }
 
-#ifdef DEBUG_SERIAL_ON
-    Serial.print("Pin 1: ");
-    Serial.println(digitalRead(1));
+    if (debugSerialOn)
+    {
+        Serial.print("Pin 1: ");
+        Serial.println(digitalRead(1));
 
-    Serial.println();
-    Serial.println();
-#endif
+        Serial.println();
+        Serial.println();
+    }
 }

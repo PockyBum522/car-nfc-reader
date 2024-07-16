@@ -4,10 +4,11 @@
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 
-Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime)
+Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime, bool *debugSerialOn)
 {
     pinMode(48, OUTPUT);
 
+    _debugSerialOn = debugSerialOn;
     _logger = logger;
     _carHelper = carHelper;
     EpochOfLastReset = *epochAtLastRead;
@@ -16,7 +17,7 @@ Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, con
     _nfc = new Adafruit_PN532(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
 }
 
-void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag>& nfcTags, bool checkVersionData)
+void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag>& nfcTags, bool checkVersionData, bool deepSleep)
 {
     digitalWrite(Definitions::PIN_PN532_BOARD_POWER, HIGH);
 
@@ -36,9 +37,12 @@ void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag
 
     digitalWrite(Definitions::PIN_PN532_BOARD_POWER, LOW);
 
-    esp_sleep_enable_timer_wakeup(IncreasingDelayWithTime() * uS_TO_S_FACTOR);
+    if (deepSleep)
+    {
+        esp_sleep_enable_timer_wakeup(IncreasingDelayWithTime() * uS_TO_S_FACTOR);
 
-    esp_deep_sleep_start();
+        esp_deep_sleep_start();
+    }
 }
 
 
@@ -119,9 +123,8 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
 
     snprintf (msg, 50, "%s", converted);
 
-#ifdef DEBUG_SERIAL_ON
-    Serial.println("New UID read: " + String(msg));
-#endif
+    if (_debugSerialOn)
+        Serial.println("New UID read: " + String(msg));
 
     for (const auto& tag : nfcTags)
     {
@@ -129,9 +132,8 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
 
         // Otherwise, we matched and authenticated!
 
-#ifdef DEBUG_SERIAL_ON
-        Serial.println(tag.Username + " seen! Unlocking car now.");
-#endif
+        if (_debugSerialOn)
+            Serial.println(tag.Username + " seen! Unlocking car now.");
 
         _carHelper->UnlockAllDoors();
 

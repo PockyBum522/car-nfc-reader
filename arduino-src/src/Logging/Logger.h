@@ -10,6 +10,8 @@
 class Logger
 {
 public:
+    explicit Logger(LogLevel logLevel, bool *enabled);
+
     struct FileAndLine
     {
         FileAndLine(int line, std::string  file) : line(line), file(std::move(file)) {}
@@ -17,8 +19,6 @@ public:
         std::string file;
         int line;
     };
-
-    explicit Logger(LogLevel logLevel);
 
     void Debug(const String &message, const FileAndLine &originalFileAndLine = GetOriginalFileAndLine());
 
@@ -39,6 +39,7 @@ private:
 
     String GetPaddedMillis(int i);
 
+    bool *_debugSerialOn;
 };
 
 #endif //MITM_RS485_SNIFFER_AND_REPEATER_SERIAL_LOGGER_H

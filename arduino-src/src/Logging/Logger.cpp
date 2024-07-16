@@ -1,14 +1,19 @@
 #include "Logger.h"
 
-Logger::Logger(LogLevel logLevel)
+Logger::Logger(LogLevel logLevel, bool *enabled)
 {
-    if (_logLevel == LogLevel::Uninitialized)
-        Serial.println("ERROR LOG LEVEL WAS UNINITIALIZED, PLEASE FIX AND RE-UPLOAD");
-
     _logLevel = logLevel;
 
-    if (_logLevel != LoggingDisabled)
+    if (_logLevel != LoggingDisabled && enabled)
         Serial.begin(115200);
+
+    if (enabled)
+    {
+        if (_logLevel == LogLevel::Uninitialized)
+            Serial.println("ERROR LOG LEVEL WAS UNINITIALIZED, PLEASE FIX AND RE-UPLOAD");
+    }
+
+    _debugSerialOn = enabled;
 }
 
 void Logger::Debug(const String &message, const Logger::FileAndLine &fileAndLine)
@@ -57,20 +62,22 @@ void Logger::WriteLogLine(const String &message, const String &logLevelAbbreviat
 
     String paddedMillis = GetPaddedMillis(8);
 
-#ifdef DEBUG_SERIAL_ON
-    Serial.print("[");
-    Serial.print(paddedMillis);
-    Serial.print("]");
 
-    Serial.print("[");
-    Serial.print(formattedFileAndLine);
-    Serial.print("] ");
+    if (_debugSerialOn)
+    {
+        Serial.print("[");
+        Serial.print(paddedMillis);
+        Serial.print("]");
 
-    Serial.print(logLevelAbbreviation);
-    Serial.print(": ");
+        Serial.print("[");
+        Serial.print(formattedFileAndLine);
+        Serial.print("] ");
 
-    Serial.println(message);
-#endif
+        Serial.print(logLevelAbbreviation);
+        Serial.print(": ");
+
+        Serial.println(message);
+    }
 }
 
 String Logger::FormatFileAndLine(const FileAndLine &originalFileAndLine)
