@@ -7,7 +7,7 @@ CarHelper::CarHelper(String *whichCarIn)
 
 void CarHelper::UnlockAllDoors() const
 {
-    if (whichCar->equals("CAR_IS_2008_HONDA"))
+    if (whichCar->equals("2008_HONDA"))
     {
         pinMode(Definitions::PIN_UNLOCK, OUTPUT);
         digitalWrite(Definitions::PIN_UNLOCK, LOW);
@@ -32,7 +32,7 @@ void CarHelper::UnlockAllDoors() const
 
 void CarHelper::LockAllDoors() const
 {
-    if (whichCar->equals("CAR_IS_2008_HONDA"))
+    if (whichCar->equals("2008_HONDA"))
     {
         pinMode(Definitions::PIN_LOCK, OUTPUT);
         digitalWrite(Definitions::PIN_LOCK, LOW);

@@ -12,9 +12,9 @@
 bool debugSerialOn = false;
 
 // Uncomment one:
-String whichCar = "CAR_IS_2008_HONDA";
-//String whichCar = "CAR_IS_2003_COROLLA";
-//String whichCar = "CAR_IS_2021_COROLLA";
+String whichCar = "2008_HONDA";
+//String whichCar = "2003_COROLLA";
+//String whichCar = "2021_COROLLA";
 
 #define microsToMillis 10000                    /* CoSnversion factor for micro seconds to milliseconds */
 
@@ -58,10 +58,10 @@ void setup()
         // If less than 10 minutes since last board reset, let wifiManager do its thing
         wifiManager.setConfigPortalBlocking(false);
         wifiManager.setMinimumSignalQuality(20);
-        wifiManager.autoConnect("2008_HONDA", Secrets::WifiPsk.c_str());
+        wifiManager.autoConnect(whichCar.c_str(), Secrets::WifiPsk.c_str());
 
         server.on("/", []() {
-            server.send(200, "text/plain", "Hi! This is small-rotovap");
+            server.send(200, "text/plain", "Hi! This is " + whichCar);
         });
 
         ElegantOTA.begin(&server);    // Start ElegantOTA
@@ -134,7 +134,7 @@ void checkDomeLight(const String &whichCar)
     int domePinRead = 999;
     bool doorOpen = false;
 
-    if (whichCar == "CAR_IS_2008_HONDA")
+    if (whichCar == "2008_HONDA")
     {
         domePinRead = analogRead(10);
         doorOpen = domePinRead < 460;
