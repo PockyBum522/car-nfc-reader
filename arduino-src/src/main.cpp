@@ -16,12 +16,10 @@ String whichCar = "2008_HONDA";
 //String whichCar = "2003_COROLLA";
 //String whichCar = "2021_COROLLA";
 
-#define microsToMillis 10000                    /* CoSnversion factor for micro seconds to milliseconds */
+// How long until it stops being able to get OTA updates after a reset
+constexpr int wifiPortalTimeout = 600;
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  3        /* Time ESP32 will go to sleep (in seconds) */
-
-RTC_DATA_ATTR int bootCount = 0;
 
 RTC_DATA_ATTR unsigned long long epochAtLastRead = 0;
 RTC_DATA_ATTR unsigned long long epochAtLastDoorOpened = 0;
@@ -53,7 +51,7 @@ void setup()
     pinMode(10, INPUT);
     pinMode(1, INPUT_PULLUP);
 
-    if (espRtc.getLocalEpoch() < 600)
+    if (espRtc.getLocalEpoch() < wifiPortalTimeout)
     {
         // If less than 10 minutes since last board reset, let wifiManager do its thing
         wifiManager.setConfigPortalBlocking(false);
@@ -83,16 +81,11 @@ void setup()
     sketchInitializers.InitializeSpiPins();
 
     sketchInitializers.Honda2008InitializeRemotePins();
-
-    if (debugSerialOn)
-        logger.Information("Checking for tag and sleeping");
-
-    bootCount = bootCount + 1;
 }
 
 void loop()
 {
-    if (espRtc.getLocalEpoch() < 600)
+    if (espRtc.getLocalEpoch() < wifiPortalTimeout)
     {
         // If less than 10 minutes since last board reset, let wifiManager do its thing then check for NFC tags and DON'T deep sleep the board
         wifiManager.process();
