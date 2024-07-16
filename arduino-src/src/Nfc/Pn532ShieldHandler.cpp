@@ -4,7 +4,7 @@
 
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 
-Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime, bool *debugSerialOn)
+Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime, bool debugSerialOn)
 {
     pinMode(48, OUTPUT);
 
@@ -159,13 +159,17 @@ bool Pn532ShieldHandler::InitializeNfcShield(bool checkVersionData)
 
         if (!versiondata)
         {
-            _logger->Warning("Didn't find PN53x board");
+            if (_debugSerialOn)
+                _logger->Warning("Didn't find PN53x board");
 
             return false;
         }
 
-        _logger->Information("Found chip PN5" + String((versiondata>>24) & 0xFF, HEX));
-        _logger->Information("Firmware ver: " + String((versiondata>>16) & 0xFF, DEC) + "." + String((versiondata>>8) & 0xFF, DEC));
+        if (_debugSerialOn)
+        {
+            _logger->Information("Found chip PN5" + String((versiondata>>24) & 0xFF, HEX));
+            _logger->Information("Firmware ver: " + String((versiondata>>16) & 0xFF, DEC) + "." + String((versiondata>>8) & 0xFF, DEC));
+        }
     }
 
     // Set the max number of retry attempts to read from a card, preventing us from waiting forever for a card, which is the default behaviour of the PN532

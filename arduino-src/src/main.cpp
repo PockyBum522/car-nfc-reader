@@ -7,8 +7,9 @@
 #include "CarHelper/CarHelper.h"
 #include "Logging/Logger.h"
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
+#include <ElegantOTA.h>
 
-bool debugSerialOn = true;
+bool debugSerialOn = false;
 
 // Uncomment one:
 String whichCar = "CAR_IS_2008_HONDA";
@@ -34,9 +35,10 @@ auto logger = *new Logger(Information, &debugSerialOn);
 ESP32Time espRtc(0);
 auto sketchInitializers = *new SketchInitializers();
 auto carHelper = *new CarHelper(&whichCar);
-auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc, &debugSerialOn);
+auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc, debugSerialOn);
 
 WiFiManager wifiManager;
+WebServer server(80);
 
 void checkDomeLight(const String &whichCar);
 
@@ -57,6 +59,16 @@ void setup()
         wifiManager.setConfigPortalBlocking(false);
         wifiManager.setMinimumSignalQuality(20);
         wifiManager.autoConnect("2008_HONDA", Secrets::WifiPsk.c_str());
+
+        server.on("/", []() {
+            server.send(200, "text/plain", "Hi! This is small-rotovap");
+        });
+
+        ElegantOTA.begin(&server);    // Start ElegantOTA
+        server.begin();
+
+        server.handleClient();
+        ElegantOTA.loop();
     }
 
     // // For power savings, set all pins not being used as inputs to outputs. It works.
@@ -72,7 +84,8 @@ void setup()
 
     sketchInitializers.Honda2008InitializeRemotePins();
 
-    logger.Information("Checking for tag and sleeping");
+    if (debugSerialOn)
+        logger.Information("Checking for tag and sleeping");
 
     bootCount = bootCount + 1;
 }
@@ -84,10 +97,16 @@ void loop()
         // If less than 10 minutes since last board reset, let wifiManager do its thing then check for NFC tags and DON'T deep sleep the board
         wifiManager.process();
 
+        server.handleClient();
+        ElegantOTA.loop();
+
         checkDomeLight(whichCar);
 
-        Serial.print("UNDER 10m threshold time: ");
-        Serial.println(espRtc.getLocalEpoch());
+        if (debugSerialOn)
+        {
+            Serial.print("UNDER 10m threshold time: ");
+            Serial.println(espRtc.getLocalEpoch());
+        }
 
         pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, false);
     }
@@ -96,8 +115,11 @@ void loop()
         // If more than 10 minutes since last board reset, then just check for tag then deep sleep
         checkDomeLight(whichCar);
 
-        Serial.print("Over 10m threshold time, should be no more AP: ");
-        Serial.println(espRtc.getLocalEpoch());
+        if (debugSerialOn)
+        {
+            Serial.print("Over 10m threshold time, should be no more AP: ");
+            Serial.println(espRtc.getLocalEpoch());
+        }
 
         pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, true);
     }
