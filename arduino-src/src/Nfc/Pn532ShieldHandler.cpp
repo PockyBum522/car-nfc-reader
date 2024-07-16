@@ -52,6 +52,13 @@ unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
 
     const unsigned long long secondsSinceLastReset = localEpoch - EpochOfLastReset;
 
+    if (_debugSerialOn)
+    {
+        Serial.println();
+        Serial.println("localEpoch: " + localEpoch);
+        Serial.println("secondsSinceLastReset: " + secondsSinceLastReset);
+        Serial.println("secondsSinceLastReset * 0.006: " + secondsSinceLastReset * 0.006);
+    }
 
     // If less than 24 hours, return value multiplied by a smaller constant
     if (secondsSinceLastReset < 86400)
