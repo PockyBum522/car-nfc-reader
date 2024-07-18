@@ -68,16 +68,16 @@ unsigned long long Pn532ShieldHandler::IncreasingDelayWithTime() const
         Serial.println(String("secondsSinceLastReset * 0.006 * multipleForMicros: ") + String(secondsSinceLastReset * 0.006 * multipleForMicros));
     }
 
-    // If less than 24 hours, return value multiplied by a smaller constant
-    if (secondsSinceLastReset < 86400)
-        return secondsSinceLastReset * 0.005 * multipleForMicros;
-
-    // If less than 72 hours, return value multiplied by the delay constant
+    // If less than 36 hours, return value multiplied by a smaller constant
+    if (secondsSinceLastReset < 129600)
+        return secondsSinceLastReset * 0.004 * multipleForMicros;
+   
+    // If more than 36, but less than 72 hours, delay will suddenly be slightly longer and increase slightly faster. At 72 hours, this will be 2.59 seconds
     if (secondsSinceLastReset < 259200)
-        return secondsSinceLastReset * 0.007 * multipleForMicros;
+        return secondsSinceLastReset * 0.01 * multipleForMicros;
 
-    // If more than 72 hours, return 4 seconds
-    return 4000000;
+    // If more than 72 hours, just eturn 3 seconds
+    return 3000000;
 
     //    Hours	    Minutes	    Seconds     Delay millis with constant = 0.006
     //
