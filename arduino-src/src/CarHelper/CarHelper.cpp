@@ -51,6 +51,8 @@ void CarHelper::OpenTrunk() const
         delay(1600);
 
         pinMode(Definitions::PIN_TRUNK, INPUT);
+
+        Serial.println("Opened trunk!");
     }
 }
 
