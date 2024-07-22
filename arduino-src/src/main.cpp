@@ -88,18 +88,23 @@ void setup()
 
 void checkTrunkOpenCounter()
 {
+    trunkOpenCounter++;
 
-    if (trunkOpenCounter > 0)
-        trunkOpenCounter--;
+Serial.print("trunkOpenCounter from main: ");
+Serial.println(trunkOpenCounter);
 
-    if (trunkOpenCounter > 400)
-    {
-        trunkOpenCounter = 0;
-
-        epochAtLastRead = 0;
-
-        carHelper.OpenTrunk();
-    }
+    //
+    // if (trunkOpenCounter > 0)
+    //     trunkOpenCounter--;
+    //
+    // if (trunkOpenCounter > 400)
+    // {
+    //     trunkOpenCounter = 0;
+    //
+    //     epochAtLastRead = 0;
+    //
+    //     carHelper.OpenTrunk();
+    // }
 }
 
 void loop()

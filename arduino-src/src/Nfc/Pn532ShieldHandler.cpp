@@ -18,6 +18,10 @@ Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, con
 
 void Pn532ShieldHandler::CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag>& nfcTags, bool checkVersionData, bool deepSleep)
 {
+    // This works
+    // Serial.print("trunkOpenCounter from CheckForNfcTagAndPowerBackDown: ");
+    // Serial.println(*_trunkOpenCounter);
+
     digitalWrite(Definitions::PIN_PN532_BOARD_POWER, HIGH);
 
     unsigned long long millisBeforeNfcInit = millis();
@@ -152,7 +156,7 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
 
         _carHelper->UnlockAllDoors();
 
-        _trunkOpenCounter += 100;
+        *_trunkOpenCounter += 100;
     }
 }
 
