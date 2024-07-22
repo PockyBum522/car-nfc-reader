@@ -9,7 +9,7 @@
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <ElegantOTA.h>
 
-bool debugSerialOn = true;
+bool debugSerialOn = false;
 
 // Uncomment one:
 String whichCar = "2008_HONDA";
@@ -88,23 +88,20 @@ void setup()
 
 void checkTrunkOpenCounter()
 {
-    trunkOpenCounter++;
+//    Serial.print("trunkOpenCounter from main: ");
+//    Serial.println(trunkOpenCounter);
 
-Serial.print("trunkOpenCounter from main: ");
-Serial.println(trunkOpenCounter);
+     if (trunkOpenCounter > 0)
+         trunkOpenCounter--;
 
-    //
-    // if (trunkOpenCounter > 0)
-    //     trunkOpenCounter--;
-    //
-    // if (trunkOpenCounter > 400)
-    // {
-    //     trunkOpenCounter = 0;
-    //
-    //     epochAtLastRead = 0;
-    //
-    //     carHelper.OpenTrunk();
-    // }
+     if (trunkOpenCounter > 200)
+     {
+         trunkOpenCounter = 0;
+
+         epochAtLastRead = 0;
+
+         carHelper.OpenTrunk();
+     }
 }
 
 void loop()
