@@ -16,6 +16,12 @@ public:
 
     static constexpr int PIN_DOME_LIGHT = 10;
 
+	static constexpr int PIN_BTN_OPT_01 = 4;
+	static constexpr int PIN_SW_OPT_02 = 1;
+	static constexpr int PIN_SW_OPT_03 = 2;
+
+
+
 	// 2003 Corolla:
 
 	// 2008 Honda:

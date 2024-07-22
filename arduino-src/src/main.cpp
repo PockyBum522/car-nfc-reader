@@ -48,7 +48,13 @@ void setup()
 
     pinMode(Definitions::PIN_DOME_LIGHT, INPUT);
 
-    //pinMode(1, INPUT_PULLUP); // This worked for testing the toggle switch
+    pinMode(Definitions::PIN_BTN_OPT_01, INPUT_PULLUP);
+    pinMode(Definitions::PIN_SW_OPT_02, INPUT_PULLUP);
+    pinMode(Definitions::PIN_SW_OPT_03, INPUT_PULLUP);
+
+    SketchInitializers::InitializeSpiPins();
+
+    SketchInitializers::InitializeRemotePins(whichCar);
 
     if (espRtc.getLocalEpoch() < wifiPortalTimeout)
     {
@@ -76,14 +82,14 @@ void setup()
     //
     //   pinMode(i, OUTPUT);
     // }
-
-    SketchInitializers::InitializeSpiPins();
-
-    SketchInitializers::InitializeRemotePins(whichCar);
 }
 
 void loop()
 {
+    const bool button01State = !digitalRead(Definitions::PIN_BTN_OPT_01);
+    const bool switch02State = !digitalRead(Definitions::PIN_SW_OPT_02);
+    const bool switch03State = !digitalRead(Definitions::PIN_SW_OPT_03);
+
     if (espRtc.getLocalEpoch() < wifiPortalTimeout)
     {
         // If less than 10 minutes since last board reset, let wifiManager do its thing then check for NFC tags and DON'T deep sleep the board
@@ -99,6 +105,19 @@ void loop()
             Serial.print("UNDER threshold time: ");
             Serial.println(espRtc.getLocalEpoch());
         }
+
+        // This all works great, also tested reboot with switches set to on in case accidentally strapping pins, board still boots fine:
+
+        // Serial.println();
+        // Serial.println();
+        // Serial.print("button01State: ");
+        // Serial.println(button01State);
+        //
+        // Serial.print("switch02State: ");
+        // Serial.println(switch02State);
+        //
+        // Serial.print("switch03State: ");
+        // Serial.println(switch03State);
 
         pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, false);
     }
