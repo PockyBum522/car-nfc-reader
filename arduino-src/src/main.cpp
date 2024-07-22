@@ -25,13 +25,15 @@ RTC_DATA_ATTR unsigned long long epochAtLastDoorOpened = 0;
 RTC_DATA_ATTR bool carLockedOnceFlag = false;
 RTC_DATA_ATTR bool carLockedTwiceFlag = false;
 
+RTC_DATA_ATTR unsigned long long trunkOpenCounter = 0;
+
 // Dependency setup
 auto logger = *new Logger(Information, &debugSerialOn);
 
 ESP32Time espRtc(0);
 auto sketchInitializers = *new SketchInitializers();
 auto carHelper = *new CarHelper(&whichCar);
-auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc, debugSerialOn);
+auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc, &trunkOpenCounter, debugSerialOn);
 
 WiFiManager wifiManager;
 WebServer server(80);
@@ -84,6 +86,22 @@ void setup()
     // }
 }
 
+void checkTrunkOpenCounter()
+{
+
+    if (trunkOpenCounter > 0)
+        trunkOpenCounter--;
+
+    if (trunkOpenCounter > 400)
+    {
+        trunkOpenCounter = 0;
+
+        epochAtLastRead = 0;
+
+        carHelper.OpenTrunk();
+    }
+}
+
 void loop()
 {
     const bool button01State = !digitalRead(Definitions::PIN_BTN_OPT_01);
@@ -113,11 +131,29 @@ void loop()
 
         checkDomeLight(whichCar);
 
+        checkTrunkOpenCounter();
+
         if (debugSerialOn)
         {
             Serial.print("UNDER threshold time: ");
             Serial.println(espRtc.getLocalEpoch());
         }
+
+        Serial.print("trunkOpenCounter: ");
+        Serial.println(trunkOpenCounter);
+
+        // This all works great, also tested reboot with switches set to on in case accidentally strapping pins, board still boots fine:
+
+        // Serial.println();
+        // Serial.println();
+        // Serial.print("button01State: ");
+        // Serial.println(button01State);
+        //
+        // Serial.print("switch02State: ");
+        // Serial.println(switch02State);
+        //
+        // Serial.print("switch03State: ");
+        // Serial.println(switch03State);
 
         pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, false);
     }
@@ -125,6 +161,8 @@ void loop()
     {
         // If more than 10 minutes since last board reset, then just check for tag then deep sleep
         checkDomeLight(whichCar);
+
+        checkTrunkOpenCounter();
 
         if (debugSerialOn)
         {
@@ -178,7 +216,7 @@ void checkDomeLight(const String &whichCar)
     }
 
     if (!carLockedTwiceFlag &&
-        secondsSinceLastDoorOpen > 60)
+        secondsSinceLastDoorOpen > 65)
     {
         carHelper.LockAllDoors();
 
@@ -192,14 +230,5 @@ void checkDomeLight(const String &whichCar)
 
         carLockedOnceFlag = false;
         carLockedTwiceFlag = false;
-    }
-
-    if (debugSerialOn)
-    {
-        Serial.print("Pin 1: ");
-        Serial.println(digitalRead(1));
-
-        Serial.println();
-        Serial.println();
     }
 }

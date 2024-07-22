@@ -12,20 +12,18 @@ void CarHelper::UnlockAllDoors() const
         pinMode(Definitions::PIN_UNLOCK, OUTPUT);
         digitalWrite(Definitions::PIN_UNLOCK, LOW);
 
-        delay(500);
+        delay(400);
 
         pinMode(Definitions::PIN_UNLOCK, INPUT);
 
-        delay(500);
+        delay(400);
 
         pinMode(Definitions::PIN_UNLOCK, OUTPUT);
         digitalWrite(Definitions::PIN_UNLOCK, LOW);
 
-        delay(500);
+        delay(400);
 
         pinMode(Definitions::PIN_UNLOCK, INPUT);
-
-        delay(500);
     }
 
 }
@@ -37,11 +35,24 @@ void CarHelper::LockAllDoors() const
         pinMode(Definitions::PIN_LOCK, OUTPUT);
         digitalWrite(Definitions::PIN_LOCK, LOW);
 
-        delay(500);
+        delay(400);
 
         pinMode(Definitions::PIN_LOCK, INPUT);
+    }
+}
 
-        delay(500);
+void CarHelper::OpenTrunk() const
+{
+    if (whichCar->equals("2008_HONDA"))
+    {
+        pinMode(Definitions::PIN_TRUNK, OUTPUT);
+        digitalWrite(Definitions::PIN_TRUNK, LOW);
+
+        delay(1600);
+
+        pinMode(Definitions::PIN_TRUNK, INPUT);
+
+        Serial.println("Opened trunk!");
     }
 }
 

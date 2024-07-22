@@ -2,7 +2,7 @@
 
 #include <ESP32Time.h>
 
-Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime, bool debugSerialOn)
+Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime, unsigned long long *trunkOpenCounter, bool debugSerialOn)
 {
     pinMode(48, OUTPUT);
 
@@ -11,6 +11,7 @@ Pn532ShieldHandler::Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, con
     _carHelper = carHelper;
     EpochOfLastReset = *epochAtLastRead;
     _espRtc = espTime;
+    _trunkOpenCounter = trunkOpenCounter;
 
     _nfc = new Adafruit_PN532(PN532_SCK, PN532_MISO, PN532_MOSI, PN532_SS);
 }
@@ -151,7 +152,7 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
 
         _carHelper->UnlockAllDoors();
 
-        delay(1000);
+        _trunkOpenCounter += 100;
     }
 }
 
