@@ -11,6 +11,7 @@ public:
 
     void UnlockAllDoors() const;
     void LockAllDoors() const;
+    void OpenTrunk() const;
 
 private:
     String *whichCar;

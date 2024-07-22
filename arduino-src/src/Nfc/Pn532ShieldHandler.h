@@ -17,7 +17,7 @@
 class Pn532ShieldHandler
 {
 public:
-    explicit Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime, bool debugSerialOn);
+    explicit Pn532ShieldHandler(Logger *logger, CarHelper *carHelper, const unsigned long long *epochAtLastRead, ESP32Time *espTime, unsigned long long *trunkOpenCounter, bool debugSerialOn);
 
     void CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag> &nfcTags, bool checkVersionData, bool deepSleep);
 
@@ -41,6 +41,8 @@ private:
     String decToHex(byte decValue, byte desiredStringLength);
 
     CarHelper *_carHelper;
+
+    unsigned long long *_trunkOpenCounter;
 
     ESP32Time *_espRtc;
 
