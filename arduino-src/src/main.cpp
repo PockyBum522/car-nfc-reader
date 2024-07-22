@@ -94,7 +94,7 @@ void checkTrunkOpenCounter()
      if (trunkOpenCounter > 0)
          trunkOpenCounter--;
 
-     if (trunkOpenCounter > 200)
+     if (trunkOpenCounter > 250)
      {
          trunkOpenCounter = 0;
 
@@ -139,10 +139,10 @@ void loop()
         {
             Serial.print("UNDER threshold time: ");
             Serial.println(espRtc.getLocalEpoch());
-        }
 
-        Serial.print("trunkOpenCounter: ");
-        Serial.println(trunkOpenCounter);
+            Serial.print("trunkOpenCounter: ");
+            Serial.println(trunkOpenCounter);
+        }
 
         // This all works great, also tested reboot with switches set to on in case accidentally strapping pins, board still boots fine:
 

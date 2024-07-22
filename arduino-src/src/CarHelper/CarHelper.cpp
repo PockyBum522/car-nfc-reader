@@ -12,16 +12,16 @@ void CarHelper::UnlockAllDoors() const
         pinMode(Definitions::PIN_UNLOCK, OUTPUT);
         digitalWrite(Definitions::PIN_UNLOCK, LOW);
 
-        delay(400);
+        delay(200);
 
         pinMode(Definitions::PIN_UNLOCK, INPUT);
 
-        delay(400);
+        delay(200);
 
         pinMode(Definitions::PIN_UNLOCK, OUTPUT);
         digitalWrite(Definitions::PIN_UNLOCK, LOW);
 
-        delay(400);
+        delay(200);
 
         pinMode(Definitions::PIN_UNLOCK, INPUT);
     }
@@ -35,7 +35,7 @@ void CarHelper::LockAllDoors() const
         pinMode(Definitions::PIN_LOCK, OUTPUT);
         digitalWrite(Definitions::PIN_LOCK, LOW);
 
-        delay(400);
+        delay(200);
 
         pinMode(Definitions::PIN_LOCK, INPUT);
     }
@@ -45,10 +45,12 @@ void CarHelper::OpenTrunk() const
 {
     if (whichCar->equals("2008_HONDA"))
     {
+        delay(500);
+
         pinMode(Definitions::PIN_TRUNK, OUTPUT);
         digitalWrite(Definitions::PIN_TRUNK, LOW);
 
-        delay(1600);
+        delay(500);
 
         pinMode(Definitions::PIN_TRUNK, INPUT);
 
