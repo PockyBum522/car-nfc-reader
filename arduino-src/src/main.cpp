@@ -11,6 +11,18 @@
 
 bool debugSerialOn = false;
 
+// New way to use PN532 board, make sure to add the following lines in platformio.ini and change the include above
+// Also make sure the library updates in .pio folder
+
+// lib_deps =
+//     adafruit/Adafruit BusIO @ ^1.16.1
+//     https://github.com/PockyBum522/Adafruit-PN532-custom-spi
+
+auto spiDevice = new Adafruit_SPIDevice(PN532_SS, PN532_SCK, PN532_MISO, PN532_MOSI,
+    300000, SPI_BITORDER_LSBFIRST, SPI_MODE0);
+
+Adafruit_PN532 m_nfc(PN532_SS, spiDevice);
+
 // Uncomment one:
 //String whichCar = "2008_HONDA";
 //String whichCar = "2003_COROLLA";
