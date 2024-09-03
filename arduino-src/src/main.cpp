@@ -12,9 +12,9 @@
 bool debugSerialOn = false;
 
 // Uncomment one:
-String whichCar = "2008_HONDA";
+//String whichCar = "2008_HONDA";
 //String whichCar = "2003_COROLLA";
-//String whichCar = "2021_COROLLA";
+String whichCar = "2021_COROLLA";
 
 // How long until it stops being able to get OTA updates after a reset
 constexpr int wifiPortalTimeout = 1200;    // 1200s = 20 minutes
@@ -42,8 +42,7 @@ void checkDomeLight(const String &whichCar);
 
 void setup()
 {
-    if (debugSerialOn)
-        Serial.begin(115200);
+    Serial.begin(115200);
 
     pinMode(Definitions::PIN_PN532_BOARD_POWER, OUTPUT);
     digitalWrite(Definitions::PIN_PN532_BOARD_POWER, HIGH);

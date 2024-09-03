@@ -142,8 +142,7 @@ void Pn532ShieldHandler::checkAuthentication(uint8_t uid[7], uint8_t uidLength, 
 
     snprintf (msg, 50, "%s", converted);
 
-    if (_debugSerialOn)
-        Serial.println("New UID read: " + String(msg));
+    Serial.println("New UID read: " + String(msg));
 
     for (const auto& tag : nfcTags)
     {
