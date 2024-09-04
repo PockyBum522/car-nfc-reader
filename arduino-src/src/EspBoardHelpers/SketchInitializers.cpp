@@ -37,5 +37,12 @@ void SketchInitializers::InitializeRemotePins(const String &whichCar)
         pinMode(Definitions::PIN_TRUNK, OUTPUT);
         digitalWrite(Definitions::PIN_LOCK, LOW);
     }
+
+    if (whichCar == String("2021_COROLLA"))
+    {
+        pinMode(Definitions::PIN_UNLOCK, INPUT);
+        pinMode(Definitions::PIN_LOCK, INPUT);
+        pinMode(Definitions::PIN_TRUNK, INPUT);
+    }
 }
 
