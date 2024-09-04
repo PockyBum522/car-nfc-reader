@@ -18,10 +18,10 @@ bool debugSerialOn = false;
 //     adafruit/Adafruit BusIO @ ^1.16.1
 //     https://github.com/PockyBum522/Adafruit-PN532-custom-spi
 
-auto spiDevice = new Adafruit_SPIDevice(PN532_SS, PN532_SCK, PN532_MISO, PN532_MOSI,
-    300000, SPI_BITORDER_LSBFIRST, SPI_MODE0);
-
-Adafruit_PN532 m_nfc(PN532_SS, spiDevice);
+// auto spiDevice = new Adafruit_SPIDevice(PN532_SS, PN532_SCK, PN532_MISO, PN532_MOSI,
+//     300000, SPI_BITORDER_LSBFIRST, SPI_MODE0);
+//
+// Adafruit_PN532 m_nfc(PN532_SS, spiDevice);
 
 // Uncomment one:
 //String whichCar = "2008_HONDA";
