@@ -105,7 +105,16 @@ private:
         if (m_whichCar == WhichCar::COROLLA_2021)
         {
             domePinRead = analogRead(Definitions::PIN_DOME_LIGHT);
-            doorOpen = domePinRead < 460;
+            doorOpen = domePinRead < 415;
+        }
+
+        if (m_debugSerialOn)
+        {
+            Serial.print("domePinRead: ");
+            Serial.print(domePinRead);
+            Serial.print(" | ");
+            Serial.print("doorOpen: ");
+            Serial.println(doorOpen);
         }
 
         if (!m_carLockedOnceFlag &&
@@ -174,7 +183,8 @@ private:
 
     void workUnlockAllDoors() const
     {
-        unsigned long long elapsed = m_epochHelper->GetMillisecondsSinceBoardPowerOn() - m_unlockAllDoorsStartedAt;
+        unsigned long long rtcMillis = m_epochHelper->GetMillisecondsSinceBoardPowerOn();
+        unsigned long long elapsed = rtcMillis - m_unlockAllDoorsStartedAt;
 
         if (m_whichCar == WhichCar::HONDA_2008)
         {
@@ -211,7 +221,16 @@ private:
 
         if (m_whichCar == WhichCar::COROLLA_2021)
         {
-            if (elapsed > 0 && elapsed < 400)
+            Serial.print("m_unlockAllDoorsStartedAt: ");
+            Serial.print(m_unlockAllDoorsStartedAt);
+            Serial.print(" | ");
+            Serial.print("rtcMillis: ");
+            Serial.print(rtcMillis);
+            Serial.print(" | ");
+            Serial.print("elapsed: ");
+            Serial.println(elapsed);
+
+            if (elapsed > 0 && elapsed < 500)
             {
                 neopixelWrite(RGB_BUILTIN, 0, 20, 0);
 
@@ -221,7 +240,7 @@ private:
                 return;
             }
 
-            if (elapsed > 400 && elapsed < 800)
+            if (elapsed > 500 && elapsed < 1000)
             {
                 neopixelWrite(RGB_BUILTIN, 0, 0, 0);
 
@@ -230,7 +249,7 @@ private:
                 return;
             }
 
-            if (elapsed > 800 && elapsed < 1200)
+            if (elapsed > 1000 && elapsed < 1500)
             {
                 neopixelWrite(RGB_BUILTIN, 0, 20, 0);
 
@@ -240,7 +259,7 @@ private:
                 return;
             }
 
-            if (elapsed > 1200 && elapsed < 1600)
+            if (elapsed > 1500 && elapsed < 2000)
             {
 
                 pinMode(Definitions::PIN_LOCK, INPUT);
@@ -249,7 +268,7 @@ private:
             }
         }
 
-        if (elapsed > 3000)
+        if (elapsed > 4000)
         {
             neopixelWrite(RGB_BUILTIN, 0, 0, 0);
 
@@ -259,7 +278,8 @@ private:
 
     void workLockAllDoors() const
     {
-        unsigned long long elapsed = m_epochHelper->GetMillisecondsSinceBoardPowerOn() - m_lockAllDoorsStartedAt;
+        unsigned long long rtcMillis = m_epochHelper->GetMillisecondsSinceBoardPowerOn();
+        unsigned long long elapsed = rtcMillis - m_unlockAllDoorsStartedAt;
 
         if (m_whichCar == WhichCar::HONDA_2008)
         {
@@ -281,6 +301,15 @@ private:
 
         if (m_whichCar == WhichCar::COROLLA_2021)
         {
+            Serial.print("m_lockAllDoorsStartedAt: ");
+            Serial.print(m_lockAllDoorsStartedAt);
+            Serial.print(" | ");
+            Serial.print("rtcMillis: ");
+            Serial.print(rtcMillis);
+            Serial.print(" | ");
+            Serial.print("elapsed: ");
+            Serial.println(elapsed);
+
             if (elapsed > 0 && elapsed < 400)
             {
                 pinMode(Definitions::PIN_LOCK, OUTPUT);
