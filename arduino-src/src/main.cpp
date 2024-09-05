@@ -27,10 +27,6 @@ RTC_DATA_ATTR bool m_carLockedTwiceFlag = false;
 
 RTC_DATA_ATTR unsigned long long m_trunkOpenCounter = 0;
 
-int Definitions::PIN_UNLOCK = 41;
-int Definitions::PIN_LOCK = 42;
-int Definitions::PIN_TRUNK = 40;
-
 auto m_spiDevice = new Adafruit_SPIDevice(PN532_SS, PN532_SCK, PN532_MISO, PN532_MOSI,
     300000, SPI_BITORDER_LSBFIRST, SPI_MODE0);
 

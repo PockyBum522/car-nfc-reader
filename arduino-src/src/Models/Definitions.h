@@ -22,5 +22,10 @@ public:
     static constexpr int CAR_REMOTE_INACTIVE = LOW;
 };
 
+// Give defaults
+int Definitions::PIN_UNLOCK = 41;
+int Definitions::PIN_LOCK = 42;
+int Definitions::PIN_TRUNK = 40;
+
 
 #endif //COROLLA_2003_NFC_CONTROLLER_PINDEFINITIONS_H
