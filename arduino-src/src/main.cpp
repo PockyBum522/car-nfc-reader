@@ -1,44 +1,50 @@
 #include <Arduino.h>
+#include <Adafruit_PN532.h>
+#include <Adafruit_SPIDevice.h>
 #include <ESP32Time.h>
-#include <Secrets/Secrets.h>
-#include "EspBoardHelpers/EspNeopixel.h"
-#include "EspBoardHelpers/SketchInitializers.h"
-#include "Nfc/Pn532ShieldHandler.h"
-#include "CarHelper/CarHelper.h"
-#include "Logging/Logger.h"
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <ElegantOTA.h>
+#include "Secrets/Secrets.h"
+#include "Models/Definitions.h"
+#include "Logic/SketchInitializers.h"
+#include "Logic/CarHelper.h"
+#include "Logic/Pn532ShieldHandler.h"
 
-bool debugSerialOn = false;
+bool debugSerialOn = true;
 
 // Uncomment one:
-//String whichCar = "2008_HONDA";
-//String whichCar = "2003_COROLLA";
-String whichCar = "2021_COROLLA";
+//auto m_whichCar = WhichCar::HONDA_2008;
+//auto m_whichCar = WhichCar::COROLLA_2003;
+auto m_whichCar = WhichCar::COROLLA_2021;
 
 // How long until it stops being able to get OTA updates after a reset
-constexpr int wifiPortalTimeout = 1200;    // 1200s = 20 minutes
+constexpr int m_wifiPortalTimeout = 1200;    // 1200s = 20 minutes
 
-RTC_DATA_ATTR unsigned long long epochAtLastRead = 0;
-RTC_DATA_ATTR unsigned long long epochAtLastDoorOpened = 0;
+RTC_DATA_ATTR unsigned long long m_epochAtLastDoorOpened = 0;
 
-RTC_DATA_ATTR bool carLockedOnceFlag = false;
-RTC_DATA_ATTR bool carLockedTwiceFlag = false;
+RTC_DATA_ATTR bool m_carLockedOnceFlag = false;
+RTC_DATA_ATTR bool m_carLockedTwiceFlag = false;
 
-RTC_DATA_ATTR unsigned long long trunkOpenCounter = 0;
+RTC_DATA_ATTR unsigned long long m_trunkOpenCounter = 0;
 
-// Dependency setup
-auto logger = *new Logger(Information, &debugSerialOn);
+int Definitions::PIN_UNLOCK = 41;
+int Definitions::PIN_LOCK = 42;
+int Definitions::PIN_TRUNK = 40;
 
-ESP32Time espRtc(0);
-auto sketchInitializers = *new SketchInitializers();
-auto carHelper = *new CarHelper(&whichCar);
-auto pn532ShieldHandler = *new Pn532ShieldHandler(&logger, &carHelper, &epochAtLastRead, &espRtc, &trunkOpenCounter, debugSerialOn);
+auto m_spiDevice = new Adafruit_SPIDevice(PN532_SS, PN532_SCK, PN532_MISO, PN532_MOSI,
+    300000, SPI_BITORDER_LSBFIRST, SPI_MODE0);
 
-WiFiManager wifiManager;
-WebServer server(80);
+Adafruit_PN532 m_nfcReader(PN532_SS, m_spiDevice);
 
-void checkDomeLight(const String &whichCar);
+ESP32Time m_espRtc(0);
+auto m_sketchInitializers = *new SketchInitializers();
+auto m_carHelper = *new CarHelper(m_whichCar);
+auto m_pn532ShieldHandler = *new Pn532ShieldHandler(&m_carHelper, &m_nfcReader, &m_espRtc, &m_trunkOpenCounter, debugSerialOn);
+
+WiFiManager m_wifiManager;
+WebServer m_server(80);
+
+void checkDomeLight(WhichCar whichCar);
 
 void setup()
 {
@@ -55,23 +61,28 @@ void setup()
 
     SketchInitializers::InitializeSpiPins();
 
-    SketchInitializers::InitializeRemotePins(whichCar);
+    SketchInitializers::InitializeRemotePins(m_whichCar);
 
-    if (espRtc.getLocalEpoch() < wifiPortalTimeout)
+    const std::string whichCarString = CarHelper::WhichCarToString(m_whichCar);
+
+    if (m_espRtc.getLocalEpoch() < m_wifiPortalTimeout)
     {
         // If less than 10 minutes since last board reset, let wifiManager do its thing
-        wifiManager.setConfigPortalBlocking(false);
-        wifiManager.setMinimumSignalQuality(20);
-        wifiManager.autoConnect(whichCar.c_str(), Secrets::WifiPsk.c_str());
+        m_wifiManager.setConfigPortalBlocking(false);
+        m_wifiManager.setMinimumSignalQuality(20);
+        m_wifiManager.autoConnect(whichCarString.c_str(), Secrets::WifiPsk.c_str());
 
-        server.on("/", []() {
-            server.send(200, "text/plain", "Hi! This is " + whichCar);
+        m_server.on("/", []()
+        {
+            const std::string carString = CarHelper::WhichCarToString(m_whichCar);
+
+            m_server.send(200, "text/plain", "Hi! This is " + String(carString.c_str()));
         });
 
-        ElegantOTA.begin(&server);    // Start ElegantOTA
-        server.begin();
+        ElegantOTA.begin(&m_server);    // Start ElegantOTA
+        m_server.begin();
 
-        server.handleClient();
+        m_server.handleClient();
         ElegantOTA.loop();
     }
 
@@ -90,16 +101,14 @@ void checkTrunkOpenCounter()
 //    Serial.print("trunkOpenCounter from main: ");
 //    Serial.println(trunkOpenCounter);
 
-     if (trunkOpenCounter > 0)
-         trunkOpenCounter--;
+     if (m_trunkOpenCounter > 0)
+         m_trunkOpenCounter--;
 
-     if (trunkOpenCounter > 250)
+     if (m_trunkOpenCounter > 250)
      {
-         trunkOpenCounter = 0;
+         m_trunkOpenCounter = 0;
 
-         epochAtLastRead = 0;
-
-         carHelper.OpenTrunk();
+         m_carHelper.OpenTrunk();
      }
 }
 
@@ -122,25 +131,25 @@ void loop()
     // Serial.print("switch03State: ");
     // Serial.println(switch03State);
 
-    if (espRtc.getLocalEpoch() < wifiPortalTimeout)
+    if (m_espRtc.getLocalEpoch() < m_wifiPortalTimeout)
     {
         // If less than 10 minutes since last board reset, let wifiManager do its thing then check for NFC tags and DON'T deep sleep the board
-        wifiManager.process();
+        m_wifiManager.process();
 
-        server.handleClient();
+        m_server.handleClient();
         ElegantOTA.loop();
 
-        checkDomeLight(whichCar);
+        checkDomeLight(m_whichCar);
 
         checkTrunkOpenCounter();
 
         if (debugSerialOn)
         {
             Serial.print("UNDER threshold time: ");
-            Serial.println(espRtc.getLocalEpoch());
+            Serial.println(m_espRtc.getLocalEpoch());
 
             Serial.print("trunkOpenCounter: ");
-            Serial.println(trunkOpenCounter);
+            Serial.println(m_trunkOpenCounter);
         }
 
         // This all works great, also tested reboot with switches set to on in case accidentally strapping pins, board still boots fine:
@@ -156,35 +165,41 @@ void loop()
         // Serial.print("switch03State: ");
         // Serial.println(switch03State);
 
-        pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, false);
+        m_pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, false);
     }
     else
     {
         // If more than 10 minutes since last board reset, then just check for tag then deep sleep
-        checkDomeLight(whichCar);
+        checkDomeLight(m_whichCar);
 
         checkTrunkOpenCounter();
 
         if (debugSerialOn)
         {
             Serial.print("Over threshold time, should be no more AP: ");
-            Serial.println(espRtc.getLocalEpoch());
+            Serial.println(m_espRtc.getLocalEpoch());
         }
 
-        pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, true);
+        m_pn532ShieldHandler.CheckForNfcTagAndPowerBackDown(Secrets::AuthorizedNfcTags, true, true);
     }
 }
 
-void checkDomeLight(const String &whichCar)
+void checkDomeLight(const WhichCar whichCar)
 {
-    const unsigned long long localEpoch = espRtc.getLocalEpoch();
+    const unsigned long long localEpoch = m_espRtc.getLocalEpoch();
 
-    const unsigned long long secondsSinceLastDoorOpen = localEpoch - epochAtLastDoorOpened;
+    const unsigned long long secondsSinceLastDoorOpen = localEpoch - m_epochAtLastDoorOpened;
 
     int domePinRead = 999;
     bool doorOpen = false;
 
-    if (whichCar == "2008_HONDA")
+    if (whichCar == WhichCar::HONDA_2008)
+    {
+        domePinRead = analogRead(Definitions::PIN_DOME_LIGHT);
+        doorOpen = domePinRead < 460;
+    }
+
+    if (whichCar == WhichCar::COROLLA_2021)
     {
         domePinRead = analogRead(Definitions::PIN_DOME_LIGHT);
         doorOpen = domePinRead < 460;
@@ -208,28 +223,28 @@ void checkDomeLight(const String &whichCar)
         Serial.println(secondsSinceLastDoorOpen);
     }
 
-    if (!carLockedOnceFlag &&
+    if (!m_carLockedOnceFlag &&
         secondsSinceLastDoorOpen > 30)
     {
-        carHelper.LockAllDoors();
+        m_carHelper.LockAllDoors();
 
-        carLockedOnceFlag = true;
+        m_carLockedOnceFlag = true;
     }
 
-    if (!carLockedTwiceFlag &&
+    if (!m_carLockedTwiceFlag &&
         secondsSinceLastDoorOpen > 65)
     {
-        carHelper.LockAllDoors();
+        m_carHelper.LockAllDoors();
 
-        carLockedTwiceFlag = true;
+        m_carLockedTwiceFlag = true;
     }
 
     if (doorOpen)
     {
-        epochAtLastDoorOpened = espRtc.getLocalEpoch();
-        pn532ShieldHandler.EpochOfLastReset = espRtc.getLocalEpoch();
+        m_epochAtLastDoorOpened = m_espRtc.getLocalEpoch();
 
-        carLockedOnceFlag = false;
-        carLockedTwiceFlag = false;
+        m_carLockedOnceFlag = false;
+        m_carLockedTwiceFlag = false;
     }
 }
+

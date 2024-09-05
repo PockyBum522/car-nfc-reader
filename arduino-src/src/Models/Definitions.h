@@ -1,16 +1,13 @@
-//
-// Created by David on 5/24/2023.
-//
-
 #ifndef COROLLA_2003_NFC_CONTROLLER_PINDEFINITIONS_H
 #define COROLLA_2003_NFC_CONTROLLER_PINDEFINITIONS_H
+
 
 class Definitions
 {
 public:
-    static constexpr int PIN_UNLOCK = 41;
-    static constexpr int PIN_LOCK = 42;
-    static constexpr int PIN_TRUNK = 40;
+    static int PIN_UNLOCK;
+    static int PIN_LOCK;
+    static int PIN_TRUNK;
 
     static constexpr int PIN_PN532_BOARD_POWER = 15;
 
@@ -20,14 +17,10 @@ public:
 	static constexpr int PIN_SW_OPT_02 = 1;
 	static constexpr int PIN_SW_OPT_03 = 2;
 
-
-
-	// 2003 Corolla:
-
 	// 2008 Honda:
     static constexpr int CAR_REMOTE_ACTIVE = HIGH;
     static constexpr int CAR_REMOTE_INACTIVE = LOW;
-
 };
+
 
 #endif //COROLLA_2003_NFC_CONTROLLER_PINDEFINITIONS_H

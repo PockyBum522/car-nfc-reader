@@ -4,6 +4,7 @@
     <option name="/Default/RiderDebugger/RiderRestoreDecompile/RestoreDecompileSetting/@EntryValue" value="false" type="bool" />
     <option name="/Default/Housekeeping/GlobalSettingsUpgraded/IsUpgraded/@EntryValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
+    <option name="/Default/Housekeeping/OptionsDialog/SelectedPageId/@EntryValue" value="CppBracesLayoutPage" type="string" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexRemoved" />
   </component>
   <component name="CidrRootsConfiguration">
@@ -12,6 +13,7 @@
       <file path="$PROJECT_DIR$/src/EspBoardHelpers" />
       <file path="$PROJECT_DIR$/src/External" />
       <file path="$PROJECT_DIR$/src/Logging" />
+      <file path="$PROJECT_DIR$/src/Logic" />
       <file path="$PROJECT_DIR$/src/Models" />
       <file path="$PROJECT_DIR$/src/Nfc" />
       <file path="$PROJECT_DIR$/src/Secrets" />
