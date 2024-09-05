@@ -58,13 +58,13 @@ public:
     static std::string WhichCarToString(const WhichCar whichCar)
     {
         if (whichCar == WhichCar::HONDA_2008)
-            return "HONDA_2008";
+            return "Honda Civic Si";
 
         if (whichCar == WhichCar::COROLLA_2003)
-            return "COROLLA_2003";
+            return "2003 Corolla";
 
         if (whichCar == WhichCar::COROLLA_2021)
-            return "COROLLA_2021";
+            return "2021 Corolla";
 
         return "ERROR";
     }
