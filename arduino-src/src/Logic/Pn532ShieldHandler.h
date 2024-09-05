@@ -71,6 +71,7 @@ public:
 
         if (success)
         {
+            m_epochHelper->SetDoorLastOpenAtToNow();        // Reset this so we can use it if there's no read later and the light comes on, we know someone drove somewhere
             m_epochHelper->SetLastReadToNow();
 
             checkAuthentication(uid, uidLength, nfcTags);

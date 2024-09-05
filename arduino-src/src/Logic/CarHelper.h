@@ -126,6 +126,13 @@ private:
 
         if (doorOpen)
         {
+            if (m_epochHelper->GetSecondsSinceDoorLastOpen() > 300)
+            {
+                // Someone either drove somewhere or used the keyfob to unlock the car
+                //      reset this so that the Wi-Fi comes back on for a bit
+                m_epochHelper->ResetSecondsSinceBoardPowerOn();
+            }
+
             m_epochHelper->SetDoorLastOpenAtToNow();
 
             m_carLockedOnceFlag = false;

@@ -18,6 +18,11 @@ public:
         return m_espRtc.getLocalEpoch();         // now: timestamp
     }
 
+    void ResetSecondsSinceBoardPowerOn()
+    {
+        m_espRtc.setTime(0);
+    }
+
     unsigned long long GetMillisecondsSinceBoardPowerOn()
     {
         return m_espRtc.getMillis();
