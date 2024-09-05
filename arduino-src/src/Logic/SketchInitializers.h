@@ -54,6 +54,18 @@ public:
             pinMode(Definitions::PIN_TRUNK, INPUT);
         }
     }
+
+    static void InitializeRgbLed(const unsigned long localEpoch, const long wifiPortalTimeout)
+    {
+        if (localEpoch > wifiPortalTimeout)
+        {
+            neopixelWrite(RGB_BUILTIN, 0, 0, 0);
+        }
+        else
+        {
+            neopixelWrite(RGB_BUILTIN, 1, 0, 0);
+        }
+    }
 };
 
 

@@ -15,23 +15,18 @@
 class Pn532ShieldHandler
 {
 public:
-    explicit Pn532ShieldHandler(CarHelper *carHelper, Adafruit_PN532 *nfcReader, ESP32Time *espTime, unsigned long long *trunkOpenCounter, bool debugSerialOn)
+    explicit Pn532ShieldHandler(CarHelper *carHelper, Adafruit_PN532 *nfcReader, EspEpochHelper *epochHelper, bool debugSerialOn)
     {
         pinMode(48, OUTPUT);
 
         m_debugSerialOn = debugSerialOn;
         m_nfc = nfcReader;
         m_carHelper = carHelper;
-        m_espRtc = espTime;
-        m_trunkOpenCounter = trunkOpenCounter;
+        m_epochHelper = epochHelper;
     }
 
     void CheckForNfcTagAndPowerBackDown(const std::vector<NfcTag> &nfcTags, bool checkVersionData, bool deepSleep)
     {
-        // This works
-        // Serial.print("trunkOpenCounter from CheckForNfcTagAndPowerBackDown: ");
-        // Serial.println(*_trunkOpenCounter);
-
         digitalWrite(Definitions::PIN_PN532_BOARD_POWER, HIGH);
 
         unsigned long long millisBeforeNfcInit = millis();
@@ -40,7 +35,7 @@ public:
 
         m_nfc->wakeup();
 
-        InitializeNfcShield(true);
+        bool unused = InitializeNfcShield(true);
 
         CheckForNfcTag(nfcTags);
 
@@ -76,7 +71,7 @@ public:
 
         if (success)
         {
-            m_espRtc->setTime(0);
+            m_epochHelper->SetLastReadToNow();
 
             checkAuthentication(uid, uidLength, nfcTags);
         }
@@ -122,7 +117,7 @@ public:
 
             m_carHelper->UnlockAllDoors();
 
-            *m_trunkOpenCounter += 100;
+            CarHelper::TrunkOpenCounter += 100;
         }
     }
 
@@ -157,7 +152,7 @@ public:
 
     unsigned long long IncreasingDelayWithTime() const
     {
-        const unsigned long long localEpoch = m_espRtc->getLocalEpoch();
+        const unsigned long long localEpoch = m_epochHelper->GetSecondsSinceBoardPowerOn();
 
         constexpr int multipleForMicros = 1000;
 
@@ -195,15 +190,11 @@ public:
 
 private:
     Adafruit_PN532 *m_nfc;
+    CarHelper *m_carHelper;
+    EspEpochHelper *m_epochHelper;
 
     char m_msg[50]{};
     char m_converted[50]{};
-
-    CarHelper *m_carHelper;
-
-    unsigned long long *m_trunkOpenCounter;
-
-    ESP32Time *m_espRtc;
 
     bool m_debugSerialOn;
 
