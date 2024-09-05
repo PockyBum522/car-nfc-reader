@@ -39,7 +39,8 @@ public:
 
         CheckForNfcTag(nfcTags);
 
-        Serial.println("NFC Init took: " + String(millis() - millisBeforeNfcInit) + " millis");
+        if (m_debugSerialOn)
+            Serial.println("NFC Init took: " + String(millis() - millisBeforeNfcInit) + " millis");
 
         unsigned long long microsToSleep = IncreasingDelayWithTime();
 

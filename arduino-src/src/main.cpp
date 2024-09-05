@@ -11,7 +11,7 @@
 #include "Logic/MainLoopDebugMessages.h"
 #include "Logic/Pn532ShieldHandler.h"
 
-bool m_debugSerialOn = true;
+bool m_debugSerialOn = false;
 std::string m_versionMessage = "v02";
 
 // Uncomment one:
